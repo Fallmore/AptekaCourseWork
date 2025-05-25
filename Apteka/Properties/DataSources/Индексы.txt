@@ -1,0 +1,52 @@
+Каждое создание индексов прописывать отдельно, не одним запросом!
+
+
+
+
+
+-- Для поиска ЛП
+CREATE INDEX CONCURRENTLY idx_med_prod_search_often1 ON medicine_product USING gin (
+    name gin_trgm_ops,
+    form,
+    packaging_form,
+    decommissioned,
+    (components::text) gin_trgm_ops
+);
+CREATE INDEX CONCURRENTLY idx_med_prod_search_often2 ON medicine_product USING gin (
+    name gin_trgm_ops,
+    decommissioned
+);
+CREATE INDEX CONCURRENTLY idx_med_prod_search_often3 ON medicine_product USING gin (
+    name gin_trgm_ops,
+	form,
+    decommissioned
+);
+-- Для set_medicine_product_analogues()
+CREATE INDEX CONCURRENTLY idx_med_prod_set_analogues ON medicine_product USING gin (
+    id_medicine_product,
+    form,
+	way_enter,
+	(components->0->>'Вещество') gin_trgm_ops
+);
+
+-- эти можно одним запросом
+CREATE INDEX idx_medicine_name_trgm ON medicine USING gin (name gin_trgm_ops);
+CREATE INDEX idx_medicine_mnn_trgm ON medicine USING gin (MNN gin_trgm_ops);
+CREATE INDEX idx_medicine_pharm_group ON medicine(pharm_group);
+CREATE INDEX idx_medicine_condition_release ON medicine(condition_release);
+--
+
+-- Для history_sale
+CREATE INDEX CONCURRENTLY idx_history_sale_product_date ON history_sale(id_medicine_product, date_sale);
+CREATE INDEX CONCURRENTLY idx_history_sale_department ON history_sale(id_department);
+CREATE INDEX CONCURRENTLY idx_history_sale_date_sale ON history_sale(date_sale);
+
+-- Для waybill
+CREATE INDEX CONCURRENTLY idx_waybill_supplier_date ON waybill(id_supplier, date_waybill);
+CREATE INDEX CONCURRENTLY idx_waybill_medicine_product ON waybill(id_medicine_product);
+
+-- Для storage_medicine_product
+CREATE INDEX CONCURRENTLY idx_storage_medicine_product_main ON storage_medicine_product(id_medicine_product, id_department);
+
+-- Для medicine_cost
+CREATE INDEX CONCURRENTLY idx_medicine_cost ON medicine_cost(id_medicine, packaging_form);
