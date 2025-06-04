@@ -6,7 +6,7 @@ public partial class Supplier : UnionId
 {
 	public override object GetId() => IdSupplier;
 
-	public int IdSupplier { get; set; }
+	public int IdSupplier { get; set; } = -1;
 
 	public string Name { get; set; } = null!;
 

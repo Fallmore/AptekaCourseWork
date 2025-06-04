@@ -24,9 +24,12 @@ namespace Apteka.ViewModel
 		private List<MedicineCost> _medicineCosts = [];
 		private List<StorageMedicineProduct> _storageMedicineProducts = [];
 		private List<HistorySale> _historySales = [];
+		private List<HistorySaleMedicineProduct> _historySalesMedicineProduct = [];
 		private List<MedicineProductDecommissioned> _medicineProductDecommissioneds = [];
 		private List<Employee> _employees = [];
 		private List<EmployeeFired> _employeeFireds = [];
+		private List<Waybill> _waybills = [];
+		private List<WaybillMedicineProduct> _waybillsMedicineProduct = [];
 
 		private List<Department> _departments = [];
 		private List<MeasureMeasurability> _measureMeasurabilities = [];
@@ -36,6 +39,8 @@ namespace Apteka.ViewModel
 		private List<MedicineTypeForm> _medicineTypeForms = [];
 		private List<MedicineWayEnter> _medicineWayEnters = [];
 		private List<OrderAssign> _orderAssigns = [];
+		private List<EmployeeRole> _employeeRoles = [];
+		private List<EmployeeAccount> _employeeAccounts = [];
 		private List<Post> _posts = [];
 		private List<StoragePharmacy> _storagePharmacies = [];
 		private List<StoragePlace> _storagePlaces = [];
@@ -83,6 +88,13 @@ namespace Apteka.ViewModel
 			set => _historySales = value;
 		}
 
+		internal List<HistorySaleMedicineProduct> HistorySalesMedicineProduct
+		{
+			get => _historySalesMedicineProduct = LoadIfEmpty(_historySalesMedicineProduct,
+				_aptekaContext.HistorySaleMedicineProducts);
+			set => _historySalesMedicineProduct = value;
+		}
+
 		internal List<MedicineProductDecommissioned> MedicineProductDecommissioneds
 		{
 			get => _medicineProductDecommissioneds = LoadIfEmpty(_medicineProductDecommissioneds, _aptekaContext.MedicineProductDecommissioneds);
@@ -93,6 +105,19 @@ namespace Apteka.ViewModel
 		{
 			get => _employees = LoadIfEmpty(_employees, _aptekaContext.Employees);
 			set => _employees = value;
+		}
+
+		internal List<Waybill> Waybills
+		{
+			get => _waybills = LoadIfEmpty(_waybills, _aptekaContext.Waybills);
+			set => _waybills = value;
+		}
+
+		internal List<WaybillMedicineProduct> WaybillsMedicineProduct
+		{
+			get => _waybillsMedicineProduct = LoadIfEmpty(_waybillsMedicineProduct,
+				_aptekaContext.WaybillMedicineProducts);
+			set => _waybillsMedicineProduct = value;
 		}
 
 		internal List<Department> Departments
@@ -147,6 +172,18 @@ namespace Apteka.ViewModel
 		{
 			get => _orderAssigns = LoadIfEmpty(_orderAssigns, _aptekaContext.OrderAssigns);
 			set => _orderAssigns = value;
+		}
+
+		internal List<EmployeeRole> EmployeeRoles
+		{
+			get => _employeeRoles = LoadIfEmpty(_employeeRoles, _aptekaContext.EmployeeRoles);
+			set => _employeeRoles = value;
+		}
+
+		internal List<EmployeeAccount> EmployeeAccounts
+		{
+			get => _employeeAccounts = LoadIfEmpty(_employeeAccounts, _aptekaContext.EmployeeAccounts);
+			set => _employeeAccounts = value;
 		}
 
 		internal List<Post> Posts

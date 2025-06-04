@@ -1,6 +1,8 @@
 ﻿using Apteka.BaseClasses;
 using Apteka.Model;
 using Apteka.ViewModel;
+using Apteka.ViewModel.EmployeeVM;
+using Microsoft.EntityFrameworkCore.ChangeTracking.Internal;
 using System.Data;
 
 namespace Apteka.View.EmployeeV
@@ -17,7 +19,6 @@ namespace Apteka.View.EmployeeV
 			_viewModel = new();
 			_viewModel.ConfigureSettingsDGV(dgvOrderAssigns);
 			_viewModel.SetDefaultDataSource(dgvOrderAssigns);
-			HideTechnicalColumns();
 			SetDataSourceToComboBoxes();
 			SetContextMenuStripItems();
 			SetDefaultDates();
@@ -28,11 +29,12 @@ namespace Apteka.View.EmployeeV
 		private void SubscribeTable()
 		{
 			OnTableUpdated += Form_OnTableUpdated;
-			_viewModel.General.DatabaseNotificationService.Subscribe("order_assign",
+			_viewModel.General.DatabaseNotificationService.Subscribe<OrderAssignsForm>("order_assign",
 				data =>
 				{
 					RefreshData<OrderAssign>(_viewModel.General.OrderAssigns,
-					value => _viewModel.General.OrderAssigns = value, data);
+					value => _viewModel.General.OrderAssigns = value, data,
+					() => _viewModel.SetDefaultDataSource(dgvOrderAssigns));
 
 				});
 		}
@@ -46,7 +48,7 @@ namespace Apteka.View.EmployeeV
 		{
 			OnTableUpdated += Form_OnTableUpdated;
 
-			_viewModel.General.DatabaseNotificationService.Subscribe("post",
+			_viewModel.General.DatabaseNotificationService.Subscribe<OrderAssignsForm>("post",
 				data =>
 				{
 					RefreshDataSimple<Post>(
@@ -54,21 +56,13 @@ namespace Apteka.View.EmployeeV
 
 				});
 
-			_viewModel.General.DatabaseNotificationService.Subscribe("department",
+			_viewModel.General.DatabaseNotificationService.Subscribe<OrderAssignsForm>("department",
 				data =>
 				{
 					RefreshDataSimple<Department>(
 					value => _viewModel.General.Departments = value, _viewModel.General);
 
 				});
-		}
-
-		private void HideTechnicalColumns()
-		{
-			dgvOrderAssigns.Columns["IdDepartment"].Visible =
-			dgvOrderAssigns.Columns["IdEmployee"].Visible =
-			dgvOrderAssigns.Columns["IdOldPost"].Visible =
-			dgvOrderAssigns.Columns["IdNewPost"].Visible = false;
 		}
 
 		private void SetContextMenuStripItems()
@@ -114,18 +108,28 @@ namespace Apteka.View.EmployeeV
 
 		private async void SearchOrderAssigns(Guid? idEmployee = null)
 		{
-			bool isAnythingFind = await _viewModel.SearchOrderAssignAsync(
-				dgvOrderAssigns, tbName.Text, tbAddress.Text,
+			List<OrderAssign>? results = await _viewModel.SearchOrderAssignAsync(
+				tbName.Text, tbAddress.Text,
 				[
-								((ComboBoxItem)(cbDepartment.SelectedItem ?? new ComboBoxItem())).Id,
-								((ComboBoxItem)(cbPost.SelectedItem ?? new ComboBoxItem())).Id],
+								((ComboBoxItem)(cbPost.SelectedItem ?? new ComboBoxItem())).Id,
+								((ComboBoxItem)(cbDepartment.SelectedItem ?? new ComboBoxItem())).Id],
 			[
 								DateOnly.FromDateTime(dtpDateAssignMin.Value.Date),
 								DateOnly.FromDateTime(dtpDateAssignMax.Value.Date)],
 					idEmployee);
 
-			if (isAnythingFind)
-				btnResetSearch.Enabled = true;
+			if (results == null) return;
+
+			if (results.Count == 0)
+			{
+				MessageBox.Show("Назначение не найдено", "Поиск назначения",
+					MessageBoxButtons.OK, MessageBoxIcon.Information);
+				return;
+			}
+
+			dgvOrderAssigns.DataSource = new SortableBindingList<OrderAssignWrapper>(
+		OrderAssignWrapper.ToOrderAssignWrapper(results, _viewModel));
+			btnResetSearch.Enabled = true;
 		}
 
 		private void SetDefaultDates()

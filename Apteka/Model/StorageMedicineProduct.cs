@@ -1,5 +1,5 @@
 ﻿using Apteka.BaseClasses;
-using Apteka.ViewModel;
+using Apteka.ViewModel.ProductsLogisticVM;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 
@@ -35,43 +35,83 @@ public partial class StorageMedicineProduct : UnionId
 
 	[Browsable(false)]
 	public virtual MeasureMeasurability MeasureNavigation { get; set; } = null!;
+
+	public StorageMedicineProduct()
+	{
+
+	}
+
+	internal StorageMedicineProduct(StorageMedicineProductWrapper smpw)
+	{
+		IdDepartment = smpw.IdDepartment;
+		IdStorage = smpw.IdStorage;
+		IdPlace = smpw.IdPlace;
+		IdMedicineProduct = smpw.IdMedicineProduct;
+		Amount = smpw.Amount;
+		Measure = smpw.Measure;
+	}
 }
 
-internal class StorageMedicineProductWrapper(StorageMedicineProduct smp, StorageMedicineProductsViewModel smpvm)
+internal class StorageMedicineProductWrapper
 {
-	public int IdDepartment { get; set; } = smp.IdDepartment;
+	public int IdDepartment { get; set; }
 
-	public int IdStorage { get; set; } = smp.IdStorage;
+	public int IdStorage { get; set; }
 
-	public int IdPlace { get; set; } = smp.IdPlace;
+	public int IdPlace { get; set; }
 
-	public Guid IdMedicineProduct { get; set; } = smp.IdMedicineProduct;
+	public Guid IdMedicineProduct { get; set; }
 
-	[Display(Name = "Отдел")]
-	public string Department { get; set; } = smpvm.GetDepartment(smp.IdDepartment).First().Name;
-
-	[Display(Name = "Склад")]
-	public string Storage { get; set; } = smpvm.GetStoragePharmacy(smp.IdStorage).First().Name;
-
-	[Display(Name = "Место")]
-	public string Place { get; set; } = smpvm.GetStoragePlace(smp.IdPlace).First().Name;
+	[Display(Name = "Серийный номер")]
+	public string SerialNumber { get; set; }
 
 	[Display(Name = "Название")]
-	public string MedicineProductName { get; set; } = smpvm.GetMedicineProduct(smp.IdMedicineProduct).First().Name;
+	public string MedicineProductName { get; set; }
+
+	[Display(Name = "Отдел")]
+	public string Department { get; set; }
+
+	[Display(Name = "Склад")]
+	public string Storage { get; set; }
+
+	[Display(Name = "Место")]
+	public string Place { get; set; }
 
 	[Display(Name = "Количество")]
-	public float Amount { get; set; } = smp.Amount;
+	public float Amount { get; set; }
 
 	[Display(Name = "Мера")]
-	public string Measure { get; set; } = smp.Measure;
+	public string Measure { get; set; }
 
-	public bool IsCriticalAmount { get; set; } = smpvm.General.MedicineProductsCriticalAmount
+	public bool IsCriticalAmount { get; set; }
+
+	public StorageMedicineProductWrapper()
+	{
+
+	}
+
+	public StorageMedicineProductWrapper(StorageMedicineProduct smp, StorageMedicineProductsViewModel smpvm)
+	{
+		IdDepartment = smp.IdDepartment;
+		IdStorage = smp.IdStorage;
+		IdPlace = smp.IdPlace;
+		IdMedicineProduct = smp.IdMedicineProduct;
+		Department = smpvm.GetDepartment(smp.IdDepartment).First().Name;
+		Storage = smpvm.GetStoragePharmacy(smp.IdStorage).First().Name;
+		Place = smpvm.GetStoragePlace(smp.IdPlace).First().Name;
+		MedicineProduct mp = smpvm.GetMedicineProduct(IdMedicineProduct).First();
+		MedicineProductName = mp.Name;
+		SerialNumber = mp.SerialNumber;
+		Amount = smp.Amount;
+		Measure = smp.Measure;
+		IsCriticalAmount = smpvm.General.MedicineProductsCriticalAmount
 		.Find(mpca =>
 			mpca.IdPlace == smp.IdPlace &&
 			mpca.IdMedicineProduct == smp.IdMedicineProduct &&
 			mpca.IdStorage == smp.IdStorage) != null;
+	}
 
-	internal static List<StorageMedicineProductWrapper> ToStorageMedicineProductWrapper(List<StorageMedicineProduct> smp, StorageMedicineProductsViewModel smpvm)
+	internal static List<StorageMedicineProductWrapper> ToList(List<StorageMedicineProduct> smp, StorageMedicineProductsViewModel smpvm)
 	{
 		List<StorageMedicineProductWrapper> smpw = [];
 

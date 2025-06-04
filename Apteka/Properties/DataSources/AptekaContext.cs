@@ -26,6 +26,8 @@ public partial class AptekaContext : DbContext
 
 	public virtual DbSet<HistorySale> HistorySales { get; set; }
 
+	public virtual DbSet<HistorySaleMedicineProduct> HistorySaleMedicineProducts { get; set; }
+
 	public virtual DbSet<MeasureMeasurability> MeasureMeasurabilities { get; set; }
 
 	public virtual DbSet<Medicine> Medicines { get; set; }
@@ -60,9 +62,11 @@ public partial class AptekaContext : DbContext
 
 	public virtual DbSet<Waybill> Waybills { get; set; }
 
+	public virtual DbSet<WaybillMedicineProduct> WaybillMedicineProducts { get; set; }
+
 	protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
-		=> optionsBuilder.UseNpgsql("Свой сделай)");
+		=> optionsBuilder.UseNpgsql("Host=localhost;Port=5432;Database=Apteka;Username=postgres;Password=slavik242");
 
 	protected override void OnModelCreating(ModelBuilder modelBuilder)
 	{
@@ -187,17 +191,9 @@ public partial class AptekaContext : DbContext
 
 			entity.ToTable("history_sale");
 
-			entity.HasIndex(e => e.DateSale, "idx_history_sale_date_sale");
-
-			entity.HasIndex(e => e.IdDepartment, "idx_history_sale_department");
-
-			entity.HasIndex(e => new { e.IdMedicineProduct, e.DateSale }, "idx_history_sale_product_date");
-
 			entity.Property(e => e.IdSale)
 				.HasDefaultValueSql("uuid_generate_v4()")
 				.HasColumnName("id_sale");
-			entity.Property(e => e.Amount).HasColumnName("amount");
-			entity.Property(e => e.Cost).HasColumnName("cost");
 			entity.Property(e => e.DateSale)
 				.HasDefaultValueSql("now()")
 				.HasColumnType("timestamp without time zone")
@@ -206,12 +202,6 @@ public partial class AptekaContext : DbContext
 			entity.Property(e => e.IdEmployee)
 				.HasDefaultValueSql("get_current_employee()")
 				.HasColumnName("id_employee");
-			entity.Property(e => e.IdMedicineProduct).HasColumnName("id_medicine_product");
-			entity.Property(e => e.IdPlace).HasColumnName("id_place");
-			entity.Property(e => e.IdStorage).HasColumnName("id_storage");
-			entity.Property(e => e.Measure)
-				.HasColumnType("character varying")
-				.HasColumnName("measure");
 
 			entity.HasOne(d => d.IdDepartmentNavigation).WithMany(p => p.HistorySales)
 				.HasForeignKey(d => d.IdDepartment)
@@ -222,26 +212,48 @@ public partial class AptekaContext : DbContext
 				.HasForeignKey(d => d.IdEmployee)
 				.OnDelete(DeleteBehavior.ClientSetNull)
 				.HasConstraintName("history_sale_id_employee_fkey");
+		});
 
-			entity.HasOne(d => d.IdMedicineProductNavigation).WithMany(p => p.HistorySales)
+		modelBuilder.Entity<HistorySaleMedicineProduct>(entity =>
+		{
+			entity
+				.HasNoKey()
+				.ToTable("history_sale_medicine_product");
+
+			entity.Property(e => e.Amount).HasColumnName("amount");
+			entity.Property(e => e.Cost).HasColumnName("cost");
+			entity.Property(e => e.IdMedicineProduct).HasColumnName("id_medicine_product");
+			entity.Property(e => e.IdPlace).HasColumnName("id_place");
+			entity.Property(e => e.IdSale).HasColumnName("id_sale");
+			entity.Property(e => e.IdStorage).HasColumnName("id_storage");
+			entity.Property(e => e.Measure)
+				.HasColumnType("character varying")
+				.HasColumnName("measure");
+
+			entity.HasOne(d => d.IdMedicineProductNavigation).WithMany()
 				.HasForeignKey(d => d.IdMedicineProduct)
 				.OnDelete(DeleteBehavior.ClientSetNull)
-				.HasConstraintName("history_sale_id_medicine_product_fkey");
+				.HasConstraintName("history_sale_medicine_product_id_medicine_product_fkey");
 
-			entity.HasOne(d => d.IdPlaceNavigation).WithMany(p => p.HistorySales)
+			entity.HasOne(d => d.IdPlaceNavigation).WithMany()
 				.HasForeignKey(d => d.IdPlace)
 				.OnDelete(DeleteBehavior.ClientSetNull)
-				.HasConstraintName("history_sale_id_place_fkey");
+				.HasConstraintName("history_sale_medicine_product_id_place_fkey");
 
-			entity.HasOne(d => d.IdStorageNavigation).WithMany(p => p.HistorySales)
+			entity.HasOne(d => d.IdSaleNavigation).WithMany()
+				.HasForeignKey(d => d.IdSale)
+				.OnDelete(DeleteBehavior.ClientSetNull)
+				.HasConstraintName("history_sale_medicine_product_id_sale_fkey");
+
+			entity.HasOne(d => d.IdStorageNavigation).WithMany()
 				.HasForeignKey(d => d.IdStorage)
 				.OnDelete(DeleteBehavior.ClientSetNull)
-				.HasConstraintName("history_sale_id_storage_fkey");
+				.HasConstraintName("history_sale_medicine_product_id_storage_fkey");
 
-			entity.HasOne(d => d.MeasureNavigation).WithMany(p => p.HistorySales)
+			entity.HasOne(d => d.MeasureNavigation).WithMany()
 				.HasForeignKey(d => d.Measure)
 				.OnDelete(DeleteBehavior.ClientSetNull)
-				.HasConstraintName("history_sale_measure_fkey");
+				.HasConstraintName("history_sale_medicine_product_measure_fkey");
 		});
 
 		modelBuilder.Entity<MeasureMeasurability>(entity =>
@@ -444,7 +456,6 @@ public partial class AptekaContext : DbContext
 				.HasDefaultValueSql("now()")
 				.HasColumnType("timestamp without time zone")
 				.HasColumnName("date_decommission");
-			entity.Property(e => e.IdDepartment).HasColumnName("id_department");
 			entity.Property(e => e.IdMedicineProduct).HasColumnName("id_medicine_product");
 			entity.Property(e => e.Measure)
 				.HasColumnType("character varying")
@@ -452,11 +463,6 @@ public partial class AptekaContext : DbContext
 			entity.Property(e => e.Reason)
 				.HasColumnType("character varying")
 				.HasColumnName("reason");
-
-			entity.HasOne(d => d.IdDepartmentNavigation).WithMany()
-				.HasForeignKey(d => d.IdDepartment)
-				.OnDelete(DeleteBehavior.ClientSetNull)
-				.HasConstraintName("medicine_product_decommissioned_id_department_fkey");
 
 			entity.HasOne(d => d.IdMedicineProductNavigation).WithOne()
 				.HasForeignKey<MedicineProductDecommissioned>(d => d.IdMedicineProduct)
@@ -628,25 +634,15 @@ public partial class AptekaContext : DbContext
 
 			entity.ToTable("waybill");
 
-			entity.HasIndex(e => e.IdMedicineProduct, "idx_waybill_medicine_product");
-
-			entity.HasIndex(e => new { e.IdSupplier, e.DateWaybill }, "idx_waybill_supplier_date");
-
 			entity.Property(e => e.IdWaybill)
 				.ValueGeneratedNever()
 				.HasColumnName("id_waybill");
-			entity.Property(e => e.Amount).HasColumnName("amount");
-			entity.Property(e => e.Cost).HasColumnName("cost");
 			entity.Property(e => e.DateWaybill).HasColumnName("date_waybill");
 			entity.Property(e => e.IdDepartment).HasColumnName("id_department");
 			entity.Property(e => e.IdEmployee)
 				.HasDefaultValueSql("get_current_employee()")
 				.HasColumnName("id_employee");
-			entity.Property(e => e.IdMedicineProduct).HasColumnName("id_medicine_product");
 			entity.Property(e => e.IdSupplier).HasColumnName("id_supplier");
-			entity.Property(e => e.Measure)
-				.HasColumnType("character varying")
-				.HasColumnName("measure");
 
 			entity.HasOne(d => d.IdDepartmentNavigation).WithMany(p => p.Waybills)
 				.HasForeignKey(d => d.IdDepartment)
@@ -658,20 +654,40 @@ public partial class AptekaContext : DbContext
 				.OnDelete(DeleteBehavior.ClientSetNull)
 				.HasConstraintName("waybill_id_employee_fkey");
 
-			entity.HasOne(d => d.IdMedicineProductNavigation).WithMany(p => p.Waybills)
-				.HasForeignKey(d => d.IdMedicineProduct)
-				.OnDelete(DeleteBehavior.ClientSetNull)
-				.HasConstraintName("waybill_id_medicine_product_fkey");
-
 			entity.HasOne(d => d.IdSupplierNavigation).WithMany(p => p.Waybills)
 				.HasForeignKey(d => d.IdSupplier)
 				.OnDelete(DeleteBehavior.ClientSetNull)
 				.HasConstraintName("waybill_id_supplier_fkey");
+		});
 
-			entity.HasOne(d => d.MeasureNavigation).WithMany(p => p.Waybills)
+		modelBuilder.Entity<WaybillMedicineProduct>(entity =>
+		{
+			entity
+				.HasNoKey()
+				.ToTable("waybill_medicine_product");
+
+			entity.Property(e => e.Amount).HasColumnName("amount");
+			entity.Property(e => e.Cost).HasColumnName("cost");
+			entity.Property(e => e.IdMedicineProduct).HasColumnName("id_medicine_product");
+			entity.Property(e => e.IdWaybill).HasColumnName("id_waybill");
+			entity.Property(e => e.Measure)
+				.HasColumnType("character varying")
+				.HasColumnName("measure");
+
+			entity.HasOne(d => d.IdMedicineProductNavigation).WithMany()
+				.HasForeignKey(d => d.IdMedicineProduct)
+				.OnDelete(DeleteBehavior.ClientSetNull)
+				.HasConstraintName("waybill_medicine_product_id_medicine_product_fkey");
+
+			entity.HasOne(d => d.IdWaybillNavigation).WithMany()
+				.HasForeignKey(d => d.IdWaybill)
+				.OnDelete(DeleteBehavior.ClientSetNull)
+				.HasConstraintName("waybill_medicine_product_id_waybill_fkey");
+
+			entity.HasOne(d => d.MeasureNavigation).WithMany()
 				.HasForeignKey(d => d.Measure)
 				.OnDelete(DeleteBehavior.ClientSetNull)
-				.HasConstraintName("waybill_measure_fkey");
+				.HasConstraintName("waybill_medicine_product_measure_fkey");
 		});
 
 		OnModelCreatingPartial(modelBuilder);

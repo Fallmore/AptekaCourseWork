@@ -1,4 +1,4 @@
-using Apteka.View.EmployeeV;
+using Apteka.View.MenuV;
 using Apteka.ViewModel;
 
 namespace Apteka
@@ -6,7 +6,7 @@ namespace Apteka
 	internal static class Program
 	{
 		/// <summary>
-		///  The main entry point for the application.
+		/// The main entry point for the application.
 		/// </summary>
 		[STAThread]
 		static void Main()
@@ -15,7 +15,8 @@ namespace Apteka
 			// see https://aka.ms/applicationconfiguration.
 			ApplicationConfiguration.Initialize();
 			GeneralViewModel.Instance.Initialize();
-			Application.Run(new EmployeesForm());
+			Application.Run(new OnlyMenuForm());
+			GeneralViewModel.Instance.DatabaseNotificationService.Dispose();
 		}
 	}
 }

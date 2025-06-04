@@ -1,0 +1,78 @@
+CREATE OR REPLACE FUNCTION notify_table_change()
+RETURNS TRIGGER AS $$
+DECLARE
+    channel_name text;
+    payload json;
+BEGIN
+    channel_name := TG_TABLE_NAME || '_updates';
+    
+    payload := json_build_object(
+        'operation', TG_OP,
+        'old', CASE WHEN TG_OP = 'DELETE' OR TG_OP = 'UPDATE' THEN row_to_json(OLD) ELSE NULL END,
+        'new', CASE WHEN TG_OP = 'INSERT' OR TG_OP = 'UPDATE' THEN row_to_json(NEW) ELSE NULL END
+    );
+    
+    PERFORM pg_notify(channel_name, payload::text);
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER employee_notify_trigger
+AFTER INSERT OR UPDATE OR DELETE ON employee
+FOR EACH ROW EXECUTE FUNCTION notify_table_change();
+
+CREATE TRIGGER employee_fired_notify_trigger
+AFTER INSERT OR UPDATE OR DELETE ON employee_fired
+FOR EACH ROW EXECUTE FUNCTION notify_table_change();
+
+CREATE TRIGGER employee_account_notify_trigger
+AFTER INSERT OR UPDATE OR DELETE ON employee_account
+FOR EACH ROW EXECUTE FUNCTION notify_table_change();
+
+CREATE TRIGGER history_sale_notify_trigger
+AFTER INSERT OR UPDATE OR DELETE ON history_sale
+FOR EACH ROW EXECUTE FUNCTION notify_table_change();
+
+CREATE TRIGGER history_sale_medicine_product_notify_trigger
+AFTER INSERT OR UPDATE OR DELETE ON history_sale_medicine_product
+FOR EACH ROW EXECUTE FUNCTION notify_table_change();
+
+CREATE TRIGGER medicine_notify_trigger
+AFTER INSERT OR UPDATE OR DELETE ON medicine
+FOR EACH ROW EXECUTE FUNCTION notify_table_change();
+
+CREATE TRIGGER medicine_cost_notify_trigger
+AFTER INSERT OR UPDATE OR DELETE ON medicine_cost
+FOR EACH ROW EXECUTE FUNCTION notify_table_change();
+
+CREATE TRIGGER medicine_product_notify_trigger
+AFTER INSERT OR UPDATE OR DELETE ON medicine_product
+FOR EACH ROW EXECUTE FUNCTION notify_table_change();
+
+CREATE TRIGGER order_assign_notify_trigger
+AFTER INSERT OR UPDATE OR DELETE ON order_assign
+FOR EACH ROW EXECUTE FUNCTION notify_table_change();
+
+CREATE TRIGGER storage_medicine_product_notify_trigger
+AFTER INSERT OR UPDATE OR DELETE ON storage_medicine_product
+FOR EACH ROW EXECUTE FUNCTION notify_table_change();
+
+CREATE TRIGGER storage_pharmacy_notify_trigger
+AFTER INSERT OR UPDATE OR DELETE ON storage_pharmacy
+FOR EACH ROW EXECUTE FUNCTION notify_table_change();
+
+CREATE TRIGGER storage_place_notify_trigger
+AFTER INSERT OR UPDATE OR DELETE ON storage_place
+FOR EACH ROW EXECUTE FUNCTION notify_table_change();
+
+CREATE TRIGGER supplier_notify_trigger
+AFTER INSERT OR UPDATE OR DELETE ON supplier
+FOR EACH ROW EXECUTE FUNCTION notify_table_change();
+
+CREATE TRIGGER waybill_notify_trigger
+AFTER INSERT OR UPDATE OR DELETE ON waybill
+FOR EACH ROW EXECUTE FUNCTION notify_table_change();
+
+CREATE TRIGGER waybill_medicine_product_notify_trigger
+AFTER INSERT OR UPDATE OR DELETE ON waybill_medicine_product
+FOR EACH ROW EXECUTE FUNCTION notify_table_change();

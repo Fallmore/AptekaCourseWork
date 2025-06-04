@@ -44,14 +44,14 @@ namespace Apteka
 
 		private void сотрудникиToolStripMenuItem_Click(object sender, EventArgs e)
 		{
-			—отрудники f = new();
-			f.Show();
+			//EmployeesDataForm f = new();
+			//f.Show();
 		}
 
 		private void управл€ющиеToolStripMenuItem_Click(object sender, EventArgs e)
 		{
-			”правл€ющие f = new();
-			f.Show();
+			//”правл€ющие f = new();
+			//f.Show();
 		}
 
 		private void dataGridView1_CellContentClick_1(object sender, DataGridViewCellEventArgs e)

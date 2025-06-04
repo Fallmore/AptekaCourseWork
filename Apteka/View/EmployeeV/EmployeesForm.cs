@@ -1,6 +1,8 @@
 ﻿using Apteka.BaseClasses;
 using Apteka.Model;
+using Apteka.View.SimpleV;
 using Apteka.ViewModel;
+using Apteka.ViewModel.EmployeeVM;
 using Microsoft.EntityFrameworkCore.ChangeTracking.Internal;
 using System.Data;
 
@@ -18,7 +20,6 @@ namespace Apteka.View.EmployeeV
 			_viewModel = new();
 			_viewModel.ConfigureSettingsDGV(dgvEmployees);
 			_viewModel.SetDefaultDataSource(dgvEmployees);
-			HideTechnicalColumns();
 			SetDataSourceToComboBoxes();
 			SetContextMenuStripItems();
 			SetDefaultDates();
@@ -29,12 +30,12 @@ namespace Apteka.View.EmployeeV
 		private void SubscribeTable()
 		{
 			OnTableUpdated += Form_OnTableUpdated;
-			_viewModel.General.DatabaseNotificationService.Subscribe("employee",
+			_viewModel.General.DatabaseNotificationService.Subscribe<EmployeesForm>("employee",
 				data =>
 				{
 					RefreshData<Employee>(_viewModel.General.Employees,
 					value => _viewModel.General.Employees = value,
-					 data, () => _viewModel.RefreshEmployees(dgvEmployees));
+					 data, () => _viewModel.SetDefaultDataSource(dgvEmployees));
 				});
 		}
 
@@ -47,7 +48,7 @@ namespace Apteka.View.EmployeeV
 		{
 			//OnTableUpdated += Form_OnTableUpdated;
 
-			_viewModel.General.DatabaseNotificationService.Subscribe("post",
+			_viewModel.General.DatabaseNotificationService.Subscribe<EmployeesForm>("post",
 				data =>
 				{
 					RefreshDataSimple<Post>(
@@ -60,7 +61,7 @@ namespace Apteka.View.EmployeeV
 
 				});
 
-			_viewModel.General.DatabaseNotificationService.Subscribe("department",
+			_viewModel.General.DatabaseNotificationService.Subscribe<EmployeesForm>("department",
 				data =>
 				{
 					RefreshDataSimple<Department>(
@@ -72,22 +73,35 @@ namespace Apteka.View.EmployeeV
 					}, _viewModel.General);
 
 				});
-		}
 
-		private void HideTechnicalColumns()
-		{
-			dgvEmployees.Columns["IdDepartment"].Visible =
-			dgvEmployees.Columns["IdEmployee"].Visible =
-			dgvEmployees.Columns["IdPost"].Visible = false;
+			_viewModel.General.DatabaseNotificationService.Subscribe<EmployeesForm>("employee_account",
+				data =>
+				{
+					RefreshDataSimple<EmployeeAccount>(
+					value => _viewModel.General.EmployeeAccounts = value,
+					_viewModel.General);
+
+				});
 		}
 
 		private void SetContextMenuStripItems()
 		{
+			contextMenuStrip1.Items.Add("Изменить данные", null,
+				(s, e) => ChangeData());
+
+			contextMenuStrip1.Items.Add("-");
+
 			contextMenuStrip1.Items.Add("Показать назначения", null,
 				(s, e) => ShowOrderAssign());
 
+			contextMenuStrip1.Items.Add("Показать роли", null,
+				(s, e) => ShowRoles());
+
 			contextMenuStrip1.Items.Add("Назначить должность", null,
 				(s, e) => AssignOrder());
+
+			contextMenuStrip1.Items.Add("Подтвердить увольнение", null,
+				(s, e) => Fire());
 
 			contextMenuStrip1.Items.Add("-");
 
@@ -127,18 +141,32 @@ namespace Apteka.View.EmployeeV
 
 		private async void SearchEmployee(Guid? idEmployee = null)
 		{
-			bool isAnythingFind = await _viewModel.SearchEmployeeAsync(
-				dgvEmployees, tbName.Text, tbAddress.Text,
-				[
-								((ComboBoxItem)(cbDepartment.SelectedItem ?? new ComboBoxItem())).Id,
-								((ComboBoxItem)(cbPost.SelectedItem ?? new ComboBoxItem())).Id],
-			[
-								DateOnly.FromDateTime(dtpDateBirthMin.Value.Date),
-								DateOnly.FromDateTime(dtpDateBirthMax.Value.Date)],
-					idEmployee);
+			Employee employee = new()
+			{
+				IdEmployee = idEmployee ?? new Guid(),
+				Name = tbName.Text,
+				Address = tbAddress.Text,
+				IdPost = ((ComboBoxItem)(cbPost.SelectedItem ?? new ComboBoxItem())).Id,
+				IdDepartment = ((ComboBoxItem)(cbDepartment.SelectedItem ?? new ComboBoxItem())).Id
+			};
 
-			if (isAnythingFind)
-				btnResetSearch.Enabled = true;
+			List<Employee>? results = await _viewModel.SearchEmployeeAsync(
+				 employee, [
+								DateOnly.FromDateTime(dtpDateBirthMin.Value.Date),
+								DateOnly.FromDateTime(dtpDateBirthMax.Value.Date)]);
+
+			if (results == null) return;
+
+			if (results.Count == 0)
+			{
+				MessageBox.Show("Сотрудник не найден", "Поиск сотрудника",
+					MessageBoxButtons.OK, MessageBoxIcon.Information);
+				return;
+			}
+
+			dgvEmployees.DataSource = new SortableBindingList<EmployeeWrapper>(
+				EmployeeWrapper.ToEmployeeWrapper(results, _viewModel));
+			btnResetSearch.Enabled = true;
 		}
 
 		private void SetDefaultDates()
@@ -171,6 +199,17 @@ namespace Apteka.View.EmployeeV
 			}
 		}
 
+		private void ChangeData()
+		{
+
+			DataGridViewCellCollection cells = dgvEmployees.SelectedRows[0].Cells;
+			Guid idEmployee = new(cells["IdEmployee"].Value.ToString() ?? "");
+			Employee e = _viewModel.General.Employees.Where(e => e.IdEmployee == idEmployee).First();
+
+			EmployeesDataForm? edf = new(e);
+			edf.ShowDialog();
+		}
+
 		private void ShowOrderAssign()
 		{
 			OrderAssignsForm? oaf = _viewModel.General.GetActivatedForm<OrderAssignsForm>();
@@ -191,6 +230,45 @@ namespace Apteka.View.EmployeeV
 				cells["Patronymic"].Value.ToString() ?? "");
 
 			oaf.SearchOrderAssignFromOtherForm([departmentName, employeeName], idEmployee);
+		}
+
+		private void ShowRoles()
+		{
+			EmployeeRolesForm erf = new();
+			DataGridViewCellCollection cells = dgvEmployees.SelectedRows[0].Cells;
+			Guid idEmployee = Guid.Parse(cells["IdEmployee"].Value.ToString() ?? "");
+
+			List<int>? employeeRoles = _viewModel.General.EmployeeAccounts
+				.Where(ea => ea.IdEmployee == idEmployee)
+				.FirstOrDefault()?.Roles;
+
+			if (employeeRoles == null) return;
+
+			foreach (int role in employeeRoles)
+				erf.clbRoles.SetItemChecked(role - 1, true);
+
+			// Отключаем взаимодействие с 1м элементом
+			erf.clbRoles.ItemCheck += (sender, e) =>
+			{
+				if (e.Index == 0)
+					e.NewValue = e.CurrentValue;
+			};
+
+			erf.StartPosition = FormStartPosition.Manual;
+			erf.Location = new Point(Cursor.Position.X - erf.Width / 4, Cursor.Position.Y - erf.Height / 2);
+
+			if (erf.ShowDialog() == DialogResult.OK)
+			{
+				int[] idRoles = erf.clbRoles.CheckedIndices.Cast<int>().ToList()
+					.Select(index => ++index).ToArray();
+				_viewModel.ControlPrivileges(idRoles, idEmployee);
+			}
+		}
+
+		internal void ShowDepartmentManagers()
+		{
+			dgvEmployees.DataSource = _viewModel.GetDepartmentManagers();
+			btnResetSearch.Enabled = true;
 		}
 
 		private void AssignOrder(string post = "", string numberOrder = "", string reason = "")
@@ -239,6 +317,25 @@ namespace Apteka.View.EmployeeV
 					af.rtbReason.Text = reason;
 					af.cbNewPost.SelectedIndex = af.cbNewPost.FindStringExact(post);
 				}
+			}
+		}
+
+		private void Fire()
+		{
+			DataGridViewCellCollection cells = dgvEmployees.SelectedRows[0].Cells;
+			ReasonForm rf = new();
+
+			Guid idEmployee = new(cells["IdEmployee"].Value.ToString() ?? string.Empty);
+			string employeeName = string.Concat(
+				cells["Surname"].Value.ToString() ?? "", " ",
+				cells["Name"].Value.ToString() ?? "", " ",
+				cells["Patronymic"].Value.ToString() ?? "");
+			rf.Text = "Причина увольнения " + employeeName;
+
+			if (rf.ShowDialog() == DialogResult.OK)
+			{
+				if (!_viewModel.InsertEmployeeFired(idEmployee, rf.rtbReason.Text))
+					Fire();
 			}
 		}
 	}

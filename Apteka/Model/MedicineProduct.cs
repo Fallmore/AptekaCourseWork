@@ -11,7 +11,7 @@ public partial class MedicineProduct : UnionId
 	[Browsable(false)]
 	public Guid IdMedicineProduct { get; set; }
 
-	public int IdMedicine { get; set; }
+	public int IdMedicine { get; set; } = -1;
 
 	[Display(Name = "Название")]
 	public string Name { get; set; } = null!;
@@ -50,16 +50,13 @@ public partial class MedicineProduct : UnionId
 	public DateOnly DateExpiration { get; set; }
 
 	[Browsable(false)]
-	public List<int>? Analogues { get; set; }
+	public List<Guid>? Analogues { get; set; }
 
 	[Display(Name = "Списан")]
 	public bool Decommissioned { get; set; }
 
 	[Browsable(false)]
 	public virtual MedicineForm FormNavigation { get; set; } = null!;
-
-	[Browsable(false)]
-	public virtual ICollection<HistorySale> HistorySales { get; set; } = new List<HistorySale>();
 
 	[Browsable(false)]
 	public virtual Medicine IdMedicineNavigation { get; set; } = null!;
@@ -76,8 +73,6 @@ public partial class MedicineProduct : UnionId
 	[Browsable(false)]
 	public virtual MedicineWayEnter WayEnterNavigation { get; set; } = null!;
 
-	[Browsable(false)]
-	public virtual ICollection<Waybill> Waybills { get; set; } = new List<Waybill>();
 }
 
 public class MedicineProductWrapper(MedicineProduct mp)
@@ -135,7 +130,7 @@ public class MedicineProductWrapper(MedicineProduct mp)
 	[Display(Name = "Списан")]
 	public string Decommissioned { get; set; } = mp.Decommissioned ? "Да" : "Нет";
 
-	internal static List<MedicineProductWrapper> ToMedicineProductWrapper(List<MedicineProduct> lmp)
+	internal static List<MedicineProductWrapper> ToList(List<MedicineProduct> lmp)
 	{
 		List<MedicineProductWrapper> lmpw = [];
 

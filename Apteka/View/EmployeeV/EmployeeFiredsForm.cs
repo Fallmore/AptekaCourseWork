@@ -1,6 +1,8 @@
 ﻿using Apteka.BaseClasses;
 using Apteka.Model;
 using Apteka.ViewModel;
+using Apteka.ViewModel.EmployeeVM;
+using Microsoft.EntityFrameworkCore.ChangeTracking.Internal;
 using System.Data;
 
 namespace Apteka.View.EmployeeV
@@ -17,7 +19,6 @@ namespace Apteka.View.EmployeeV
 			_viewModel = new();
 			_viewModel.ConfigureSettingsDGV(dgvEmployeeFireds);
 			_viewModel.SetDefaultDataSource(dgvEmployeeFireds);
-			HideTechnicalColumns();
 			SetDataSourceToComboBoxes();
 			SetContextMenuStripItems();
 			SetDefaultDates();
@@ -28,12 +29,12 @@ namespace Apteka.View.EmployeeV
 		private void SubscribeTable()
 		{
 			OnTableUpdated += Form_OnTableUpdated;
-			_viewModel.General.DatabaseNotificationService.Subscribe("employee_fired",
+			_viewModel.General.DatabaseNotificationService.Subscribe<EmployeeFiredsForm>("employee_fired",
 				data =>
 				{
 					RefreshData<EmployeeFired>(_viewModel.General.EmployeeFireds,
-					value => _viewModel.General.EmployeeFireds = value, data);
-
+					value => _viewModel.General.EmployeeFireds = value, data,
+					() => _viewModel.SetDefaultDataSource(dgvEmployeeFireds));
 				});
 		}
 
@@ -46,7 +47,7 @@ namespace Apteka.View.EmployeeV
 		{
 			OnTableUpdated += Form_OnTableUpdated;
 
-			_viewModel.General.DatabaseNotificationService.Subscribe("post",
+			_viewModel.General.DatabaseNotificationService.Subscribe<EmployeeFiredsForm>("post",
 				data =>
 				{
 					RefreshDataSimple<Post>(
@@ -54,20 +55,13 @@ namespace Apteka.View.EmployeeV
 
 				});
 
-			_viewModel.General.DatabaseNotificationService.Subscribe("department",
+			_viewModel.General.DatabaseNotificationService.Subscribe<EmployeeFiredsForm>("department",
 				data =>
 				{
 					RefreshDataSimple<Department>(
 					value => _viewModel.General.Departments = value, _viewModel.General);
 
 				});
-		}
-
-		private void HideTechnicalColumns()
-		{
-			dgvEmployeeFireds.Columns["IdDepartment"].Visible =
-			dgvEmployeeFireds.Columns["IdEmployee"].Visible =
-			dgvEmployeeFireds.Columns["IdPost"].Visible = false;
 		}
 
 		private void SetContextMenuStripItems()
@@ -99,11 +93,11 @@ namespace Apteka.View.EmployeeV
 
 		private async void SearchEmployeeFired(Guid? idEmployee = null)
 		{
-			bool isAnythingFind = await _viewModel.SearchEmployeeAsync(
-				dgvEmployeeFireds, tbName.Text, tbAddress.Text,
+			List<EmployeeFired>? results = await _viewModel.SearchEmployeeFiredAsync(
+				tbName.Text, tbAddress.Text,
 				[
-								((ComboBoxItem)(cbDepartment.SelectedItem ?? new ComboBoxItem())).Id,
-								((ComboBoxItem)(cbPost.SelectedItem ?? new ComboBoxItem())).Id],
+								((ComboBoxItem)(cbPost.SelectedItem ?? new ComboBoxItem())).Id,
+								((ComboBoxItem)(cbDepartment.SelectedItem ?? new ComboBoxItem())).Id],
 			[
 								DateOnly.FromDateTime(dtpDateBirthMin.Value.Date),
 								DateOnly.FromDateTime(dtpDateBirthMax.Value.Date),
@@ -111,8 +105,19 @@ namespace Apteka.View.EmployeeV
 								DateOnly.FromDateTime(dtpDateFireMax.Value.Date)],
 					idEmployee);
 
-			if (isAnythingFind)
-				btnResetSearch.Enabled = true;
+			if (results == null) return;
+
+			if (results.Count == 0)
+			{
+				MessageBox.Show("Уволенный сотрудник не найден", "Поиск уволенного сотрудника",
+						MessageBoxButtons.OK, MessageBoxIcon.Information);
+				return;
+			}
+
+			dgvEmployeeFireds.DataSource = new SortableBindingList<EmployeeFiredWrapper>(
+						EmployeeFiredWrapper.ToEmployeeFiredWrapper(results, _viewModel));
+			btnResetSearch.Enabled = true;
+
 		}
 
 		private void SetDefaultDates()

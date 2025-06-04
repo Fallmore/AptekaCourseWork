@@ -1,5 +1,5 @@
 ﻿using Apteka.BaseClasses;
-using Apteka.ViewModel;
+using Apteka.ViewModel.MedicineVM;
 using System.ComponentModel.DataAnnotations;
 
 namespace Apteka.Model;
@@ -18,10 +18,6 @@ public partial class MedicineProductDecommissioned : UnionId
 
 	public DateTime DateDecommission { get; set; }
 
-	public int IdDepartment { get; set; }
-
-	public virtual Department IdDepartmentNavigation { get; set; } = null!;
-
 	public virtual MedicineProduct IdMedicineProductNavigation { get; set; } = null!;
 
 	public virtual MeasureMeasurability MeasureNavigation { get; set; } = null!;
@@ -30,8 +26,6 @@ public partial class MedicineProductDecommissioned : UnionId
 internal class MedicineProductDecommissionedWrapper(MedicineProductDecommissioned mpd, MedicineProductDecommissionedViewModel mpdvm)
 {
 	public Guid IdMedicineProduct { get; set; } = mpd.IdMedicineProduct;
-
-	public int IdDepartment { get; set; } = mpd.IdDepartment;
 
 	[Display(Name = "Название")]
 	public string MedicineProductName { get; set; } = mpdvm.GetMedicineProduct(mpd.IdMedicineProduct).First().Name;
@@ -47,9 +41,6 @@ internal class MedicineProductDecommissionedWrapper(MedicineProductDecommissione
 
 	[Display(Name = "Дата списания")]
 	public DateTime DateDecommission { get; set; } = mpd.DateDecommission;
-
-	[Display(Name = "Отдел")]
-	public string Department { get; set; } = mpdvm.GetDepartment().First().Name;
 
 	internal static List<MedicineProductDecommissionedWrapper> ToMedicineProductDecommissionedWrapper(List<MedicineProductDecommissioned> mpd, MedicineProductDecommissionedViewModel mpdvm)
 	{

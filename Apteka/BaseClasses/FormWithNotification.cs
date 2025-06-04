@@ -1,7 +1,9 @@
-﻿using Apteka.ViewModel;
+﻿using Apteka.Model;
+using Apteka.ViewModel;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using Newtonsoft.Json.Serialization;
 using System.ComponentModel;
 
 namespace Apteka.BaseClasses
@@ -52,20 +54,21 @@ namespace Apteka.BaseClasses
 			{
 				Console.WriteLine($"Ошибка обработки {typeof(T).Name} уведомлений: {ex.Message}");
 			}
+
 		}
 
-		private void Insert<T>(List<T> collection, Action<List<T>> setter, JToken payload)
+		private void Insert<T>(List<T> collection, Action<List<T>> setter, JToken payload) where T : UnionId
 		{
-			var newItem = JsonConvert.DeserializeObject<T>(payload["new"].ToString().Replace("_", ""));
+			T? newItem = HandleJsonbFields<T>(payload["new"] as JObject);
 			collection.Add(newItem);
 			setter(collection);
 		}
 
 		private void Update<T>(List<T> collection, Action<List<T>> setter, JToken payload) where T : UnionId
 		{
-			T? oldItem = JsonConvert.DeserializeObject<T>(payload["old"].ToString().Replace("_", ""));
+			T? oldItem = HandleJsonbFields<T>(payload["old"] as JObject);
 			T? existing = collection.FirstOrDefault(x => x.GetId().Equals(oldItem.GetId()));
-			T? updatedItem = JsonConvert.DeserializeObject<T>(payload["new"].ToString().Replace("_", ""));
+			T? updatedItem = HandleJsonbFields<T>(payload["new"] as JObject);
 
 			if (existing != null)
 			{
@@ -77,7 +80,7 @@ namespace Apteka.BaseClasses
 
 		private void Delete<T>(List<T> collection, Action<List<T>> setter, JToken payload) where T : UnionId
 		{
-			T? dItem = JsonConvert.DeserializeObject<T>(payload["old"].ToString().Replace("_", ""));
+			T? dItem = HandleJsonbFields<T>(payload["old"] as JObject);
 			T? deletedItem = collection.FirstOrDefault(x => x.GetId().Equals(dItem.GetId()));
 
 			if (deletedItem != null)
@@ -85,6 +88,26 @@ namespace Apteka.BaseClasses
 				collection.Remove(deletedItem);
 				setter(collection);
 			}
+		}
+
+
+		private JsonSerializerSettings _settings = new JsonSerializerSettings
+		{
+			ContractResolver = new DefaultContractResolver
+			{
+				NamingStrategy = new SnakeCaseNamingStrategy()
+			}
+		};
+
+		private T HandleJsonbFields<T>(JObject jObject) where T : UnionId
+		{
+			// Специальная обработка для MedicineProduct
+			if (typeof(T) == typeof(MedicineProduct))
+			{
+				jObject["components"] = jObject["components"]?.ToString(Formatting.None);
+			}
+
+			return jObject.ToObject<T>(JsonSerializer.Create(_settings));
 		}
 	}
 }

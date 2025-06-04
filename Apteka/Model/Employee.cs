@@ -1,5 +1,5 @@
 ﻿using Apteka.BaseClasses;
-using Apteka.ViewModel;
+using Apteka.ViewModel.EmployeeVM;
 using System.ComponentModel.DataAnnotations;
 
 namespace Apteka.Model;

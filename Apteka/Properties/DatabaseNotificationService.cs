@@ -1,6 +1,8 @@
-﻿using Newtonsoft.Json;
+﻿using Apteka.BaseClasses;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Npgsql;
+using System.Collections.Concurrent;
 using System.Diagnostics;
 
 namespace Apteka.Properties
@@ -8,7 +10,7 @@ namespace Apteka.Properties
 	internal class DatabaseNotificationService : IDisposable
 	{
 		private readonly NpgsqlConnection _connection;
-		private readonly Dictionary<string, Action<JObject>> _handlers = new();
+		private readonly ConcurrentDictionary<string, ConcurrentBag<Action<JObject>>> _subscribers = new();
 		private CancellationTokenSource _cts;
 		private Task _listenerTask;
 
@@ -33,7 +35,7 @@ namespace Apteka.Properties
 				{
 					try
 					{
-						await _connection.WaitAsync(_cts.Token).WaitAsync(TimeSpan.FromMilliseconds(1000));
+						await _connection.WaitAsync(_cts.Token).ConfigureAwait(false);
 					}
 					catch (OperationCanceledException)
 					{
@@ -66,27 +68,42 @@ namespace Apteka.Properties
 			_cts = new CancellationTokenSource();
 		}
 
-		public void Subscribe(string tableName, Action<JObject> handler)
+		public void Subscribe<T>(string tableName, Action<JObject> handler) where T : FormWithNotification
 		{
 			try
 			{
 				var channel = $"{tableName}_updates";
 
-				if (_listenerTask != null) StopListening();
+				_subscribers.AddOrUpdate(channel,
+			_ =>
+						{
+							if (_listenerTask != null) StopListening();
 
-				using var cmd = new NpgsqlCommand($"LISTEN {channel}", _connection);
-				cmd.ExecuteNonQuery();
+							// Если канала нет - создаем новую подписку в БД
+							using var cmd = new NpgsqlCommand($"LISTEN {channel}", _connection);
+							cmd.ExecuteNonQuery();
 
-				StartListening();
+							StartListening();
 
-				_handlers[channel] = handler;
+							var bag = new ConcurrentBag<Action<JObject>>
+							{
+								handler
+							};
+							return bag;
+						},
+			(_, existingBag) =>
+						{
+							// Если канал есть - просто добавляем обработчик
+							existingBag.Add(handler);
+							return existingBag;
+						});
 			}
 			catch (NpgsqlException ex)
 			{
 				Debug.WriteLine($"Ошибка подписи: {ex.Message}");
 				if (_connection.State == System.Data.ConnectionState.Closed)
 					_connection.Open();
-				Subscribe(tableName, handler);
+				Subscribe<T>(tableName, handler);
 			}
 		}
 
@@ -99,16 +116,19 @@ namespace Apteka.Properties
 
 		private void _connection_Notification(object sender, NpgsqlNotificationEventArgs e)
 		{
-			if (_handlers.TryGetValue(e.Channel, out var handler))
+			if (_subscribers.TryGetValue(e.Channel, out var handlers))
 			{
-				try
+				var data = JsonConvert.DeserializeObject<dynamic>(e.Payload);
+				foreach (var handler in handlers)
 				{
-					var data = JsonConvert.DeserializeObject<dynamic>(e.Payload);
-					handler(data);
-				}
-				catch (Exception ex)
-				{
-					Debug.WriteLine($"Ошибка уведомлений: {ex.Message}");
+					try
+					{
+						handler(data);
+					}
+					catch (Exception ex)
+					{
+						Console.WriteLine($"Ошибка в обработчике: {ex.Message}");
+					}
 				}
 			}
 		}
