@@ -24,7 +24,7 @@ namespace Apteka.View.EmployeeV
 			SetDefaultDates();
 			SubscribeTable();
 			SubscribeDictionaries();
-			_viewModel.General.SetFormByRole(lblDepartment,cbDepartment,dgvOrderAssigns);
+			_viewModel.General.SetFormByRole(lblDepartment, cbDepartment, dgvOrderAssigns);
 		}
 
 		private void SubscribeTable()

@@ -46,7 +46,7 @@ namespace Apteka.ViewModel.EmployeeVM
 			try
 			{
 				AptekaContext _localContext = AptekaContextFactory
-					.Create(_general.MainUsername,_general.MainPassword);
+					.Create(_general.MainUsername, _general.MainPassword);
 				_localContext.Database
 						.ExecuteSqlRaw("INSERT INTO employee_account (id_employee, login, password, roles) " +
 						"VALUES ({0}, {1}, {2}, {3})",

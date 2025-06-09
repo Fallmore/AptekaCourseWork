@@ -93,7 +93,7 @@ namespace Apteka.ViewModel.EmployeeVM
 		{
 			List<Employee> currentManagers = GetCurrentEmployees(_general.Employees)
 				.Where(e => _general.EmployeeAccounts
-					.Any(ea => ea.Roles.Contains((int)Roles.УправляющийОтдела) 
+					.Any(ea => ea.Roles.Contains((int)Roles.УправляющийОтдела)
 						&& ea.IdEmployee == e.IdEmployee))
 				.ToList();
 			return new SortableBindingList<EmployeeWrapper>(

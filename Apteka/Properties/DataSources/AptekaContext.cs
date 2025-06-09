@@ -1,6 +1,5 @@
 ﻿using Apteka.Model;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 
 namespace Apteka.Properties.DataSources;
 

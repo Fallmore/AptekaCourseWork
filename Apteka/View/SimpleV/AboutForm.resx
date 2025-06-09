@@ -121,7 +121,7 @@
   <data name="pictureBox1.Image" type="System.Drawing.Bitmap, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
     <value>
         iVBORw0KGgoAAAANSUhEUgAAAhwAAAGVCAIAAAA6y7+mAAAABGdBTUEAALGPC/xhBQAAAAlwSFlzAAAO
-        vQAADr0BR/uQrQAA/7JJREFUeF6U/Qe3HUtypQni18x0l6ZKMuXT0FprXAAXuNBa6wsNPK21yHypkymo
+        vAAADrwBlbxySQAA/7JJREFUeF6U/Qe3HUtypQni18x0l6ZKMuXT0FprXAAXuNBa6wsNPK21yHypkymo
         k2SSTOoqFqvY09WzZubfzDb73HfYiXPxMnutvXxZeHh4uHt42BcW4pxF//tvfb3oqX/320+j//i7z6H/
         8KVn/92Xnv33Mn7v+f/0lcW/+bWlv/HVJUp/+xvLpd95asWXnl755efWfOnZ1am1v/vcut97fuOXX9g0
         ocWbv7JkC/rq0q1fX779a8tCX166Q/rq8l3SV5btVPqNFbufWrnn6VUzz6zeKz27Zt+zq2efWbVfqfTU
@@ -6240,7 +6240,7 @@
 Цель продукта: Автоматизация ведения учёта лекарственных препаратов.
 Среда разработки ПО: Инструментальная среда Visual Studio 2022.
 Язык программирования: Visual C#.
-ПО включает 22 формы, 15376 строк кода.
+ПО включает 26 форм, 16686 строк кода.
 </value>
   </data>
   <data name="$this.Icon" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">

@@ -25,7 +25,7 @@ namespace Apteka.ViewModel.ProductsLogisticVM
 			switch (typeof(T).Name)
 			{
 				case "HistorySaleWrapper":
-					List<HistorySaleWrapper> list =	HistorySaleWrapper.ToList(_general.HistorySales, this);
+					List<HistorySaleWrapper> list = HistorySaleWrapper.ToList(_general.HistorySales, this);
 
 					if (_general.ChoosedRole != (int)Roles.Директор)
 						list = list

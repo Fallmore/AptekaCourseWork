@@ -2,7 +2,6 @@
 using Apteka.Model;
 using Apteka.View.EmployeeV;
 using Apteka.ViewModel;
-using Apteka.ViewModel.EmployeeVM;
 using Apteka.ViewModel.ProductsLogisticVM;
 using Microsoft.EntityFrameworkCore.ChangeTracking.Internal;
 using System.Data;
@@ -30,7 +29,7 @@ namespace Apteka.View
 			SubscribeTable();
 			SubscribeDictionaries();
 			_viewModel.General
-				.SetFormByRole(lblDepartment,cbDepartment,dgvHistorySales);
+				.SetFormByRole(lblDepartment, cbDepartment, dgvHistorySales);
 		}
 
 		private void SubscribeTable()
