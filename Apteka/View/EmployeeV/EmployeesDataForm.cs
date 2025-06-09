@@ -8,26 +8,43 @@ namespace Apteka.View.EmployeeV
 	{
 		private EmployeeDataViewModel _viewModel;
 
-		public EmployeesDataForm(Employee? e = null)
+
+		public EmployeesDataForm()
+		{
+			Init();
+		}
+
+		public EmployeesDataForm(Employee e)
+		{
+			Init();
+			SetEmployeeData(e);
+		}
+
+		private void Init()
 		{
 			InitializeComponent();
 			_viewModel = new();
 			SetDataSourceToComboBoxes();
 			dtpBirthday.Value =
 				dtpBirthday.MaxDate = DateTime.Now.AddYears(-18);
-			SetEmployeeData(e);
+			if (_viewModel.General.ChoosedRole != (int)Roles.Директор)
+			{
+				cbDepartment.Enabled = false;
+				cbDepartment.SelectedValue = EmployeeAccountViewModel.GetCurrentDepartment();
+			}
 		}
 
-		private void SetEmployeeData(Employee? e)
+		private void SetEmployeeData(Employee e)
 		{
-			if (e == null) return;
 			tbSurname.Text = e.Surname;
 			tbName.Text = e.Name;
 			tbPatronymic.Text = e.Patronymic;
 			tbAddress.Text = e.Address;
 			dtpBirthday.Value = new(e.Birthday, new());
 			cbPost.SelectedIndex = e.IdPost - 1;
-			cbDepartment.SelectedIndex = e.IdDepartment - 1;
+
+			if (_viewModel.General.ChoosedRole != (int)Roles.Директор)
+				cbDepartment.SelectedValue = e.IdDepartment;
 
 			string employeeName = string.Concat(e.Surname, " ",
 				e.Name, " ", e.Patronymic);
@@ -76,7 +93,12 @@ namespace Apteka.View.EmployeeV
 
 			if (lblIdEmployee.Text == "")
 			{
-				ShowCreateAccount(employee);
+				if (ShowCreateAccount(employee))
+				{
+					MessageBox.Show("Пользователь успешно добавлен", "Добавление пользователя",
+									MessageBoxButtons.OK, MessageBoxIcon.Error);
+					Close();
+				}
 			}
 		}
 
@@ -99,13 +121,13 @@ namespace Apteka.View.EmployeeV
 			return employee;
 		}
 
-		private void ShowCreateAccount(Employee employee)
+		private bool ShowCreateAccount(Employee employee)
 		{
 			EmployeeAccountForm ea = new();
 			ea.Text = "Создание аккаунта";
 			ea.FormBorderStyle = FormBorderStyle.None;
 			ea.lblIdEmployee.Text = employee.IdEmployee.ToString();
-			ea.ShowDialog();
+			return (ea.ShowDialog() == DialogResult.OK);
 		}
 	}
 }

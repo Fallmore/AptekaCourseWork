@@ -22,6 +22,9 @@ namespace Apteka.View.EmployeeV
 				.Where(name => name != "Директор")
 			.ToArray();
 
+			if (_viewModel.General.ChoosedRole == (int)Roles.УправляющийОтдела)
+				roles = roles.Where(r => r != "Управляющий отдела").ToArray();
+
 			clbRoles.Items.AddRange(roles);
 		}
 	}

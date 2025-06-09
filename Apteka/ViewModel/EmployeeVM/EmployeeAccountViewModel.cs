@@ -1,4 +1,6 @@
 ﻿using Apteka.Model;
+using Apteka.Properties;
+using Apteka.Properties.DataSources;
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
 
@@ -6,20 +8,46 @@ namespace Apteka.ViewModel.EmployeeVM
 {
 	internal class EmployeeAccountViewModel
 	{
-		private readonly GeneralViewModel _general;
+		private static readonly GeneralViewModel _general = GeneralViewModel.Instance;
 
-		internal GeneralViewModel General => _general;
+		internal static GeneralViewModel General => _general;
 
-		public EmployeeAccountViewModel()
+		public EmployeeAccountViewModel() { }
+
+		internal static List<EmployeeRole> GetRoles(Guid idEmployee)
 		{
-			_general = GeneralViewModel.Instance;
+			List<int> idRoles = _general.EmployeeAccounts
+				.Where(ea => ea.IdEmployee == idEmployee)
+				.Select(ea => ea.Roles)
+				.First().ToList();
+			return _general.EmployeeRoles
+				.Where(er => idRoles.Contains(er.IdRole))
+				.ToList();
 		}
 
-		internal bool InsertAccount(EmployeeAccount e)
+		internal static Guid GetCurrentEmployee()
+		{
+			return _general.AptekaContext.Database
+				.SqlQueryRaw<Guid>("SELECT * FROM get_current_employee() as Value", 0)
+				.AsEnumerable()
+				.First();
+		}
+
+		internal static int GetCurrentDepartment()
+		{
+			return _general.AptekaContext.Database
+				.SqlQueryRaw<int>("SELECT * FROM get_current_department() as Value", 0)
+				.AsEnumerable()
+				.First();
+		}
+
+		internal static bool InsertAccount(EmployeeAccount e)
 		{
 			try
 			{
-				General.AptekaContext.Database
+				AptekaContext _localContext = AptekaContextFactory
+					.Create(_general.MainUsername,_general.MainPassword);
+				_localContext.Database
 						.ExecuteSqlRaw("INSERT INTO employee_account (id_employee, login, password, roles) " +
 						"VALUES ({0}, {1}, {2}, {3})",
 						e.IdEmployee, e.Login, e.Password, e.Roles);
@@ -27,7 +55,7 @@ namespace Apteka.ViewModel.EmployeeVM
 			}
 			catch (PostgresException ex)
 			{
-				string message = ex.Message;
+				string? message = ex.Message.Split(':').Skip(1).FirstOrDefault()?.Trim();
 
 				if ((ex.ConstraintName ?? "").Contains("empty"))
 					message = "Ошибка! Пустые поля, пожалуйста, заполните все поля!";

@@ -21,24 +21,20 @@ namespace Apteka.ViewModel.EmployeeVM
 		/// <param name="dgv"></param>
 		internal void SetDefaultDataSource(DataGridView dgv)
 		{
-			dgv.DataSource = new SortableBindingList<OrderAssignWrapper>(
-				OrderAssignWrapper.ToOrderAssignWrapper(_general.OrderAssigns, this));
+			List<OrderAssignWrapper> list = OrderAssignWrapper.ToList(_general.OrderAssigns, this);
+
+			if (_general.ChoosedRole != (int)Roles.Директор)
+				list = list
+					.Where(l => l.IdDepartment == EmployeeAccountViewModel.GetCurrentDepartment())
+					.ToList();
+
+			dgv.DataSource = new SortableBindingList<OrderAssignWrapper>(list);
 
 			if (dgv.Columns.Contains("IdDepartment"))
 				dgv.Columns["IdDepartment"].Visible =
 				dgv.Columns["IdEmployee"].Visible =
 				dgv.Columns["IdOldPost"].Visible =
 				dgv.Columns["IdNewPost"].Visible = false;
-		}
-
-		/// <summary>
-		/// Обновляет данные склада таблицы
-		/// </summary>
-		/// <param name="dgv"></param>
-		internal void RefreshEmployees(DataGridView dgv)
-		{
-			_general.LoadTableForWrite<OrderAssign>();
-			SetDefaultDataSource(dgv);
 		}
 
 		/// <summary>

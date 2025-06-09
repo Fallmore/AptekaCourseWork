@@ -82,18 +82,22 @@ namespace Apteka
 			cmsMedicineProduct.Items.Add("Показать на складе", null,
 				(s, e) => ShowProductInStorage());
 
-			cmsMedicineProduct.Items.Add("Показать продажи", null,
+			if (_viewModel.General.ChoosedRole != (int)Roles.Сотрудник &&
+				_viewModel.General.ChoosedRole != (int)Roles.Кассир)
+			{
+				cmsMedicineProduct.Items.Add("Показать продажи", null,
 				(s, e) => ShowHistorySale());
 
-			cmsMedicineProduct.Items.Add("-");
+				cmsMedicineProduct.Items.Add("-");
 
-			cmsMedicineProduct.Items.Add("Показать списание", null,
-				(s, e) => ShowDecommission());
-			cmsMedicineProduct.Items[cmsMedicineProduct.Items.Count - 1].Name = _keyContexMenuItems[0];
+				cmsMedicineProduct.Items.Add("Показать списание", null,
+					(s, e) => ShowDecommission());
+				cmsMedicineProduct.Items[cmsMedicineProduct.Items.Count - 1].Name = _keyContexMenuItems[0];
 
-			cmsMedicineProduct.Items.Add("Подтвердить факт списания", null,
-				(s, e) => Decommission(IsExpired()));
-			cmsMedicineProduct.Items[cmsMedicineProduct.Items.Count - 1].Name = _keyContexMenuItems[1];
+				cmsMedicineProduct.Items.Add("Подтвердить факт списания", null,
+					(s, e) => Decommission(IsExpired()));
+				cmsMedicineProduct.Items[cmsMedicineProduct.Items.Count - 1].Name = _keyContexMenuItems[1];
+			}
 
 			cmsMedicineProduct.Items.Add("-");
 
@@ -104,14 +108,18 @@ namespace Apteka
 
 		private void SetCmsMedicineProductCostItems()
 		{
-			cmsMedicineProductCost.Items.Add("Изменить данные", null,
+			if (_viewModel.General.ChoosedRole != (int)Roles.Сотрудник &&
+				_viewModel.General.ChoosedRole != (int)Roles.Кассир)
+			{
+				cmsMedicineProductCost.Items.Add("Изменить данные", null,
 				(s, e) => ChangeDataCost());
 
-			cmsMedicineProductCost.Items.Add("Добавить упаковку и цену", null,
-				(s, e) => AddDataCost());
-			cmsMedicineProduct.Items[cmsMedicineProduct.Items.Count - 1].Name = _keyContexMenuItems[2];
+				cmsMedicineProductCost.Items.Add("Добавить упаковку и цену", null,
+					(s, e) => AddDataCost());
+				cmsMedicineProduct.Items[cmsMedicineProduct.Items.Count - 1].Name = _keyContexMenuItems[2];
 
-			cmsMedicineProductCost.Items.Add("-");
+				cmsMedicineProductCost.Items.Add("-");
+			}
 
 			cmsMedicineProductCost.Items.Add("Копировать содержимое ячейки", null,
 				(s, e) =>
@@ -276,8 +284,12 @@ namespace Apteka
 				{
 					bool isDecommissioned = row.Cells["Decommissioned"].Value.ToString() == "Да";
 #pragma warning disable CS8602 // Разыменование вероятной пустой ссылки.
-					cmsMedicineProduct.Items[_keyContexMenuItems[0]].Visible = isDecommissioned;
-					cmsMedicineProduct.Items[_keyContexMenuItems[1]].Visible = !isDecommissioned;
+					if (_viewModel.General.ChoosedRole != (int)Roles.Сотрудник &&
+						_viewModel.General.ChoosedRole != (int)Roles.Кассир)
+					{
+						cmsMedicineProduct.Items[_keyContexMenuItems[0]].Visible = isDecommissioned;
+						cmsMedicineProduct.Items[_keyContexMenuItems[1]].Visible = !isDecommissioned;
+					}
 #pragma warning restore CS8602 // Разыменование вероятной пустой ссылки.
 					ShowCost(row);
 					if (MouseButtons.Right == e.Button)
@@ -285,10 +297,14 @@ namespace Apteka
 				}
 				else
 				{
-					cmsMedicineProductCost.Items[0].Visible =
+					if (_viewModel.General.ChoosedRole != (int)Roles.Сотрудник &&
+						_viewModel.General.ChoosedRole != (int)Roles.Кассир)
+					{
+						cmsMedicineProductCost.Items[0].Visible =
 						cmsMedicineProductCost.Items[2].Visible =
 						cmsMedicineProductCost.Items[3].Visible = true;
-					cmsMedicineProductCost.Items[1].Visible = false;
+						cmsMedicineProductCost.Items[1].Visible = false;
+					}
 					if (MouseButtons.Right == e.Button)
 						cmsMedicineProductCost.Show(Cursor.Position);
 				}
@@ -301,10 +317,14 @@ namespace Apteka
 			{
 				if (dgv.Name == "dgvMedicineProductCost")
 				{
-					cmsMedicineProductCost.Items[0].Visible =
-						cmsMedicineProductCost.Items[2].Visible =
-						cmsMedicineProductCost.Items[3].Visible = false;
-					cmsMedicineProductCost.Items[1].Visible = true;
+					if (_viewModel.General.ChoosedRole != (int)Roles.Сотрудник &&
+						_viewModel.General.ChoosedRole != (int)Roles.Кассир)
+					{
+						cmsMedicineProductCost.Items[0].Visible =
+							cmsMedicineProductCost.Items[2].Visible =
+							cmsMedicineProductCost.Items[3].Visible = false;
+						cmsMedicineProductCost.Items[1].Visible = true;
+					}
 					if (MouseButtons.Right == e.Button)
 						cmsMedicineProductCost.Show(Cursor.Position);
 				}

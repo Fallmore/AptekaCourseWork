@@ -24,6 +24,7 @@ namespace Apteka.View.EmployeeV
 			SetDefaultDates();
 			SubscribeTable();
 			SubscribeDictionaries();
+			_viewModel.General.SetFormByRole(lblDepartment,cbDepartment,dgvOrderAssigns);
 		}
 
 		private void SubscribeTable()
@@ -128,7 +129,7 @@ namespace Apteka.View.EmployeeV
 			}
 
 			dgvOrderAssigns.DataSource = new SortableBindingList<OrderAssignWrapper>(
-		OrderAssignWrapper.ToOrderAssignWrapper(results, _viewModel));
+		OrderAssignWrapper.ToList(results, _viewModel));
 			btnResetSearch.Enabled = true;
 		}
 

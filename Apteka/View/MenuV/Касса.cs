@@ -2,6 +2,7 @@
 using Apteka.Model;
 using Apteka.View;
 using Apteka.View.SimpleV;
+using Apteka.ViewModel.EmployeeVM;
 using Apteka.ViewModel.MenuVM;
 using Apteka.ViewModel.ProductsLogisticVM;
 using Microsoft.EntityFrameworkCore.ChangeTracking.Internal;
@@ -34,6 +35,8 @@ namespace Apteka
 			SubscribeTable();
 			HideTechnicalColumns();
 			SetCmsMedicineProductItems();
+			_viewModel.General.SetFormByRole(null, null, dgvStorageMedicineProduct);
+			_viewModel.General.SetFormByRole(null, null, dgvAnaloguesStorageMedicineProduct);
 		}
 
 		private void Init()
@@ -44,7 +47,8 @@ namespace Apteka
 			_listHSMPW = [];
 			_sale = new HistorySale()
 			{
-				IdSale = Guid.NewGuid()
+				IdSale = Guid.NewGuid(),
+				IdDepartment = EmployeeAccountViewModel.GetCurrentDepartment()
 			};
 		}
 
@@ -233,7 +237,7 @@ namespace Apteka
 				{
 					IdSale = _sale.IdSale,
 					Amount = amount,
-					Cost = _viewModel.CountCost(selectedMedicineProduct.IdMedicineProduct, amount)
+					Cost = float.Round(_viewModel.CountCost(selectedMedicineProduct.IdMedicineProduct, amount), 2)
 				};
 				pickedMedicineProduct.Parse(selectedMedicineProduct);
 
@@ -295,7 +299,7 @@ namespace Apteka
 
 		private void ShowCost(float cost)
 		{
-			tstbCost.Text = float.Round(float.Parse(tstbCost.Text) + cost, 2).ToString();
+			tstbCost.Text = (float.Parse(tstbCost.Text) + cost).ToString();
 		}
 
 		private void RemoveAllPickedMedicineProduct()
@@ -467,7 +471,12 @@ namespace Apteka
 				return;
 
 			if (!_viewModel.InsertSaleMedicineProduct(HistorySaleMedicineProduct.ToList(_listHSMPW.ToList())))
+			{
+				_viewModel.RemoveSale(_sale);
 				return;
+			}
+
+			RemoveAllPickedMedicineProduct();
 		}
 	}
 }

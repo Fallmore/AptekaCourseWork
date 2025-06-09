@@ -38,7 +38,6 @@
 			btnCancel = new Button();
 			lblTitle = new Label();
 			lblIdEmployee = new Label();
-			label3 = new Label();
 			SuspendLayout();
 			// 
 			// label1
@@ -141,22 +140,13 @@
 			lblIdEmployee.Name = "lblIdEmployee";
 			lblIdEmployee.Size = new Size(0, 15);
 			lblIdEmployee.TabIndex = 32;
-			// 
-			// label3
-			// 
-			label3.AutoSize = true;
-			label3.Location = new Point(138, 130);
-			label3.Name = "label3";
-			label3.Size = new Size(0, 15);
-			label3.TabIndex = 33;
-			label3.Visible = false;
+			lblIdEmployee.Visible = false;
 			// 
 			// EmployeeAccountForm
 			// 
 			AutoScaleDimensions = new SizeF(7F, 15F);
 			AutoScaleMode = AutoScaleMode.Font;
 			ClientSize = new Size(260, 259);
-			Controls.Add(label3);
 			Controls.Add(lblIdEmployee);
 			Controls.Add(lblTitle);
 			Controls.Add(btnCancel);
@@ -169,6 +159,7 @@
 			Controls.Add(label1);
 			FormBorderStyle = FormBorderStyle.FixedToolWindow;
 			Name = "EmployeeAccountForm";
+			StartPosition = FormStartPosition.CenterScreen;
 			Text = "Акканут";
 			ResumeLayout(false);
 			PerformLayout();
@@ -187,6 +178,5 @@
 		private Button btnCancel;
 		internal Label lblTitle;
 		internal Label lblIdEmployee;
-		internal Label label3;
 	}
 }

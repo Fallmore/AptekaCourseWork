@@ -1,7 +1,10 @@
 ﻿using Apteka.Model;
 using Apteka.Properties;
 using Apteka.Properties.DataSources;
+using Apteka.ViewModel.EmployeeVM;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking.Internal;
+using Microsoft.Extensions.Configuration;
 using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
 using System.Reflection;
@@ -14,9 +17,13 @@ namespace Apteka.ViewModel
 
 		private AptekaContext _aptekaContext;
 		private DatabaseNotificationService _databaseNotificationService;
-		private int _millisecondsWait = 1000;
 		// Хранит все открытые формы
 		private FormCollection _fc;
+
+		private string _mainUsername = "postgres";
+		#error Впиши свой пароль к БД
+		private string _mainPassword = "";
+		private int _ChoosedRole;
 
 		#region Данные таблиц БД
 		private List<Medicine> _medicines = [];
@@ -53,6 +60,10 @@ namespace Apteka.ViewModel
 		// Препараты на складе с критическим количеством
 		private List<StorageMedicineProduct> _medicineProductsCriticalAmount = [];
 		private float _criticalAmount = 5;
+		private int _hourOfEndWork = 2;
+		private string _pathReport = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+		private int _millisecondsWait = 1000;
+
 		internal static GeneralViewModel Instance => _instance.Value;
 		internal AptekaContext AptekaContext => _aptekaContext;
 		internal DatabaseNotificationService DatabaseNotificationService { get => _databaseNotificationService; set => _databaseNotificationService = value; }
@@ -216,12 +227,17 @@ namespace Apteka.ViewModel
 		internal TimeSpan CriticalTimeOfExpiration { get => _criticalDaysOfExpiration; set => _criticalDaysOfExpiration = value; }
 		internal float CriticalAmount { get => _criticalAmount; set => _criticalAmount = value; }
 		public int MillisecondsWait { get => _millisecondsWait; set => _millisecondsWait = value; }
+		public int HourOfEndWork { get => _hourOfEndWork; set => _hourOfEndWork = value; }
+		public string PathReport { get => _pathReport; set => _pathReport = value; }
+		public int ChoosedRole { get => _ChoosedRole; set => _ChoosedRole = value; }
+		public string MainPassword { get => _mainPassword; set => _mainPassword = value; }
+		public string MainUsername { get => _mainUsername; set => _mainUsername = value; }
 
 		private GeneralViewModel() { }
 
 		public async void Initialize()
 		{
-			_aptekaContext = new();
+			_aptekaContext = AptekaContextFactory.Create(_mainUsername, _mainPassword);
 			_aptekaContext.Database.EnsureCreated();
 			_databaseNotificationService = new(_aptekaContext.Database.GetConnectionString() ?? "");
 			_fc = Application.OpenForms;
@@ -238,7 +254,7 @@ namespace Apteka.ViewModel
 
 		private async Task CheckDateExpiration()
 		{
-			await using var localContext = new AptekaContext();
+			await using var localContext = AptekaContextFactory.Create(_mainUsername, _mainPassword);
 			_medicineProductsExpired = await localContext.Database
 					.SqlQueryRaw<Guid>("SELECT * FROM check_expired_medicine_product({0})", _criticalDaysOfExpiration)
 					.ToListAsync();
@@ -247,7 +263,7 @@ namespace Apteka.ViewModel
 
 		private async Task CheckCriticalAmount()
 		{
-			await using var localContext = new AptekaContext();
+			await using var localContext = AptekaContextFactory.Create(_mainUsername, _mainPassword);
 			_medicineProductsCriticalAmount = await localContext.StorageMedicineProducts
 					.FromSqlRaw("SELECT * FROM check_critical_amount_medicine_product({0})", _criticalAmount)
 					.ToListAsync();
@@ -256,14 +272,14 @@ namespace Apteka.ViewModel
 
 		private async Task ClearMedicineProductSales()
 		{
-			await using var localContext = new AptekaContext();
+			await using var localContext = AptekaContextFactory.Create(_mainUsername, _mainPassword);
 			localContext.Database.ExecuteSql($"CALL clear_medicine_product_sales()");
 			return;
 		}
 
 		private async Task ClearEmployeeData()
 		{
-			await using var localContext = new AptekaContext();
+			await using var localContext = AptekaContextFactory.Create(_mainUsername, _mainPassword);
 			localContext.Database
 				   .ExecuteSql($"CALL clear_employee_data()");
 			return;
@@ -286,28 +302,9 @@ namespace Apteka.ViewModel
 			return privateList;
 		}
 
-		internal void LoadTableForWrite<T>()
+		internal void SetUserConnection(string username, string password)
 		{
-			switch (typeof(T).Name)
-			{
-				case "MedicineProduct":
-					_medicineProducts = _aptekaContext.MedicineProducts.ToList();
-					break;
-				case "StorageMedicineProduct":
-					_storageMedicineProducts = _aptekaContext.StorageMedicineProducts.ToList();
-					break;
-				case "HistorySale":
-					_historySales = _aptekaContext.HistorySales.ToList();
-					break;
-				case "MedicineProductDecommissioned":
-					_medicineProductDecommissioneds = _aptekaContext.MedicineProductDecommissioneds.ToList();
-					break;
-				case "Employee":
-					_employees = _aptekaContext.Employees.ToList();
-					break;
-				default:
-					break;
-			}
+			_aptekaContext = AptekaContextFactory.Create(username, password);
 		}
 
 		/// <summary>
@@ -347,6 +344,26 @@ namespace Apteka.ViewModel
 					DataPropertyName = prop.Name,  // Привязка к свойству
 					Name = prop.Name               // Техническое имя столбца
 				});
+			}
+		}
+
+		internal void SetFormByRole(Label? label, ComboBox? comboBox, DataGridView? dataGridView)
+		{
+			int userRole = ChoosedRole;
+
+			if (userRole != (int)Roles.Директор)
+			{
+				if (comboBox != null)
+				{
+					comboBox.Visible = false;
+					comboBox.SelectedValue = EmployeeAccountViewModel.GetCurrentDepartment();
+				}
+
+				if (label != null)
+					label.Visible = false;
+
+				if (dataGridView != null)
+					dataGridView.Columns["Department"].Visible = false;
 			}
 		}
 

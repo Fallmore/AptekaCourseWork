@@ -23,11 +23,15 @@ namespace Apteka.ViewModel.EmployeeVM
 		/// <param name="dgv"></param>
 		internal void SetDefaultDataSource(DataGridView dgv)
 		{
-			List<Employee> currentEmployees = _general.Employees
-				.Where(e => _general.EmployeeFireds.Any(f => f.IdEmployee != e.IdEmployee))
-				.ToList();
+			List<Employee> currentEmployees = GetCurrentEmployees(_general.Employees);
+
+			if (_general.ChoosedRole != (int)Roles.Директор)
+				currentEmployees = currentEmployees
+					.Where(l => l.IdDepartment == EmployeeAccountViewModel.GetCurrentDepartment())
+					.ToList();
+
 			dgv.DataSource = new SortableBindingList<EmployeeWrapper>(
-				EmployeeWrapper.ToEmployeeWrapper(currentEmployees, this));
+				EmployeeWrapper.ToList(currentEmployees, this));
 
 			if (dgv.Columns.Contains("IdDepartment"))
 				dgv.Columns["IdDepartment"].Visible =
@@ -76,14 +80,24 @@ namespace Apteka.ViewModel.EmployeeVM
 			}
 		}
 
+		internal List<Employee> GetCurrentEmployees(List<Employee> employees)
+		{
+			return employees
+				.Where(e => _general.EmployeeFireds.Any(f => f.IdEmployee != e.IdEmployee)
+					&& _general.EmployeeAccounts.Any(ea => !ea.Roles.Contains((int)Roles.Директор)
+							&& ea.IdEmployee == e.IdEmployee))
+				.ToList();
+		}
+
 		internal SortableBindingList<EmployeeWrapper> GetDepartmentManagers()
 		{
-			List<Employee> currentManagers = _general.Employees
-				.Where(e => _general.EmployeeFireds.Any(ef => ef.IdEmployee != e.IdEmployee)
-					&& _general.EmployeeAccounts.Any(ea => ea.Roles.Contains(3)))
+			List<Employee> currentManagers = GetCurrentEmployees(_general.Employees)
+				.Where(e => _general.EmployeeAccounts
+					.Any(ea => ea.Roles.Contains((int)Roles.УправляющийОтдела) 
+						&& ea.IdEmployee == e.IdEmployee))
 				.ToList();
 			return new SortableBindingList<EmployeeWrapper>(
-				EmployeeWrapper.ToEmployeeWrapper(currentManagers, this));
+				EmployeeWrapper.ToList(currentManagers, this));
 		}
 
 		internal DateOnly[] GetMinMaxDatesBirth()

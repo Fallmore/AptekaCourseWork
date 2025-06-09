@@ -41,7 +41,7 @@
 			label7 = new Label();
 			label5 = new Label();
 			cbDepartment = new ComboBox();
-			label3 = new Label();
+			lblDepartment = new Label();
 			cbMedicineProduct = new ComboBox();
 			label4 = new Label();
 			btnResetSearch = new Button();
@@ -84,7 +84,7 @@
 			splitContainer1.Panel1.Controls.Add(label7);
 			splitContainer1.Panel1.Controls.Add(label5);
 			splitContainer1.Panel1.Controls.Add(cbDepartment);
-			splitContainer1.Panel1.Controls.Add(label3);
+			splitContainer1.Panel1.Controls.Add(lblDepartment);
 			splitContainer1.Panel1.Controls.Add(cbMedicineProduct);
 			splitContainer1.Panel1.Controls.Add(label4);
 			splitContainer1.Panel1.Controls.Add(btnResetSearch);
@@ -224,16 +224,16 @@
 			cbDepartment.Size = new Size(210, 25);
 			cbDepartment.TabIndex = 34;
 			// 
-			// label3
+			// lblDepartment
 			// 
-			label3.Anchor = AnchorStyles.Top | AnchorStyles.Bottom;
-			label3.AutoSize = true;
-			label3.Font = new Font("Segoe UI", 9.75F, FontStyle.Regular, GraphicsUnit.Point, 204);
-			label3.Location = new Point(229, 65);
-			label3.Name = "label3";
-			label3.Size = new Size(44, 17);
-			label3.TabIndex = 33;
-			label3.Text = "Отдел";
+			lblDepartment.Anchor = AnchorStyles.Top | AnchorStyles.Bottom;
+			lblDepartment.AutoSize = true;
+			lblDepartment.Font = new Font("Segoe UI", 9.75F, FontStyle.Regular, GraphicsUnit.Point, 204);
+			lblDepartment.Location = new Point(229, 65);
+			lblDepartment.Name = "lblDepartment";
+			lblDepartment.Size = new Size(44, 17);
+			lblDepartment.TabIndex = 33;
+			lblDepartment.Text = "Отдел";
 			// 
 			// cbMedicineProduct
 			// 
@@ -302,7 +302,7 @@
 			// 
 			splitContainer2.Panel2.Controls.Add(dgvMedicineProduct);
 			splitContainer2.Size = new Size(836, 522);
-			splitContainer2.SplitterDistance = 292;
+			splitContainer2.SplitterDistance = 291;
 			splitContainer2.SplitterWidth = 5;
 			splitContainer2.TabIndex = 9;
 			// 
@@ -319,7 +319,7 @@
 			dgvWaybill.Name = "dgvWaybill";
 			dgvWaybill.ReadOnly = true;
 			dgvWaybill.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
-			dgvWaybill.Size = new Size(836, 292);
+			dgvWaybill.Size = new Size(836, 291);
 			dgvWaybill.TabIndex = 8;
 			dgvWaybill.CellMouseDown += dgv_CellMouseDown;
 			dgvWaybill.SelectionChanged += dgvWaybill_SelectionChanged;
@@ -337,7 +337,7 @@
 			dgvMedicineProduct.Name = "dgvMedicineProduct";
 			dgvMedicineProduct.ReadOnly = true;
 			dgvMedicineProduct.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
-			dgvMedicineProduct.Size = new Size(836, 225);
+			dgvMedicineProduct.Size = new Size(836, 226);
 			dgvMedicineProduct.TabIndex = 9;
 			dgvMedicineProduct.CellMouseDown += dgv_CellMouseDown;
 			// 
@@ -393,7 +393,7 @@
 		private Label label7;
 		private Label label5;
 		private ComboBox cbDepartment;
-		private Label label3;
+		private Label lblDepartment;
 		private ComboBox cbMedicineProduct;
 		private Label label4;
 		private Button btnResetSearch;

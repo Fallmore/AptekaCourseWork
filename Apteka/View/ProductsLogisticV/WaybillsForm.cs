@@ -2,6 +2,7 @@
 using Apteka.Model;
 using Apteka.View.EmployeeV;
 using Apteka.ViewModel;
+using Apteka.ViewModel.EmployeeVM;
 using Apteka.ViewModel.ProductsLogisticVM;
 using Microsoft.EntityFrameworkCore.ChangeTracking.Internal;
 using System.Data;
@@ -27,6 +28,8 @@ namespace Apteka.View
 			SetCmsWaybillItems();
 			SetCmsWaybillMedicineProductItems();
 			SubscribeTable();
+			_viewModel.General
+				.SetFormByRole(lblDepartment, cbDepartment, dgvWaybill);
 		}
 
 		private void SubscribeTable()

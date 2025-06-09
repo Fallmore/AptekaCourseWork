@@ -6,16 +6,14 @@ namespace Apteka.View.EmployeeV
 {
 	public partial class EmployeeAccountForm : Form
 	{
-		private EmployeeAccountViewModel _viewModel;
 		public EmployeeAccountForm()
 		{
 			InitializeComponent();
-			_viewModel = new();
 		}
 
 		private void btnOK_Click(object sender, EventArgs e)
 		{
-			if (tbMatchPassword != tbPassword)
+			if (tbMatchPassword.Text != tbPassword.Text)
 			{
 				MessageBox.Show("Пароли не совпадают", "Ошибка данных",
 						MessageBoxButtons.OK, MessageBoxIcon.Error);
@@ -32,7 +30,7 @@ namespace Apteka.View.EmployeeV
 
 			ea.Roles = SetRoles();
 
-			if (!_viewModel.InsertAccount(ea))
+			if (!EmployeeAccountViewModel.InsertAccount(ea))
 				DialogResult = DialogResult.None;
 		}
 
@@ -60,7 +58,7 @@ namespace Apteka.View.EmployeeV
 			}
 			else idRoles = [1];
 
-			return [];
+			return [.. idRoles];
 		}
 	}
 }

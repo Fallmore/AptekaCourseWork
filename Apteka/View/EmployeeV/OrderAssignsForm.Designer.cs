@@ -30,7 +30,7 @@
 		{
 			components = new System.ComponentModel.Container();
 			splitContainer1 = new SplitContainer();
-			this.dtpDateAssignMin = new DateTimePicker();
+			dtpDateAssignMin = new DateTimePicker();
 			dtpDateAssignMax = new DateTimePicker();
 			label2 = new Label();
 			label8 = new Label();
@@ -39,7 +39,7 @@
 			tbName = new TextBox();
 			label5 = new Label();
 			cbDepartment = new ComboBox();
-			label3 = new Label();
+			lblDepartment = new Label();
 			cbPost = new ComboBox();
 			label4 = new Label();
 			btnResetSearch = new Button();
@@ -64,7 +64,7 @@
 			// 
 			// splitContainer1.Panel1
 			// 
-			splitContainer1.Panel1.Controls.Add(this.dtpDateAssignMin);
+			splitContainer1.Panel1.Controls.Add(dtpDateAssignMin);
 			splitContainer1.Panel1.Controls.Add(dtpDateAssignMax);
 			splitContainer1.Panel1.Controls.Add(label2);
 			splitContainer1.Panel1.Controls.Add(label8);
@@ -73,7 +73,7 @@
 			splitContainer1.Panel1.Controls.Add(tbName);
 			splitContainer1.Panel1.Controls.Add(label5);
 			splitContainer1.Panel1.Controls.Add(cbDepartment);
-			splitContainer1.Panel1.Controls.Add(label3);
+			splitContainer1.Panel1.Controls.Add(lblDepartment);
 			splitContainer1.Panel1.Controls.Add(cbPost);
 			splitContainer1.Panel1.Controls.Add(label4);
 			splitContainer1.Panel1.Controls.Add(btnResetSearch);
@@ -88,15 +88,15 @@
 			// 
 			// dtpDateAssignMin
 			// 
-			this.dtpDateAssignMin.Anchor = AnchorStyles.Top | AnchorStyles.Bottom;
-			this.dtpDateAssignMin.CalendarFont = new Font("Segoe UI", 9.75F, FontStyle.Regular, GraphicsUnit.Point, 204);
-			this.dtpDateAssignMin.Font = new Font("Segoe UI", 9.75F, FontStyle.Regular, GraphicsUnit.Point, 204);
-			this.dtpDateAssignMin.Format = DateTimePickerFormat.Short;
-			this.dtpDateAssignMin.Location = new Point(445, 26);
-			this.dtpDateAssignMin.MinDate = new DateTime(1940, 1, 1, 0, 0, 0, 0);
-			this.dtpDateAssignMin.Name = "dtpDateAssignMin";
-			this.dtpDateAssignMin.Size = new Size(93, 25);
-			this.dtpDateAssignMin.TabIndex = 25;
+			dtpDateAssignMin.Anchor = AnchorStyles.Top | AnchorStyles.Bottom;
+			dtpDateAssignMin.CalendarFont = new Font("Segoe UI", 9.75F, FontStyle.Regular, GraphicsUnit.Point, 204);
+			dtpDateAssignMin.Font = new Font("Segoe UI", 9.75F, FontStyle.Regular, GraphicsUnit.Point, 204);
+			dtpDateAssignMin.Format = DateTimePickerFormat.Short;
+			dtpDateAssignMin.Location = new Point(445, 26);
+			dtpDateAssignMin.MinDate = new DateTime(1940, 1, 1, 0, 0, 0, 0);
+			dtpDateAssignMin.Name = "dtpDateAssignMin";
+			dtpDateAssignMin.Size = new Size(93, 25);
+			dtpDateAssignMin.TabIndex = 25;
 			// 
 			// dtpDateAssignMax
 			// 
@@ -183,16 +183,16 @@
 			cbDepartment.Size = new Size(210, 25);
 			cbDepartment.TabIndex = 15;
 			// 
-			// label3
+			// lblDepartment
 			// 
-			label3.Anchor = AnchorStyles.Top | AnchorStyles.Bottom;
-			label3.AutoSize = true;
-			label3.Font = new Font("Segoe UI", 9.75F, FontStyle.Regular, GraphicsUnit.Point, 204);
-			label3.Location = new Point(228, 62);
-			label3.Name = "label3";
-			label3.Size = new Size(44, 17);
-			label3.TabIndex = 14;
-			label3.Text = "Отдел";
+			lblDepartment.Anchor = AnchorStyles.Top | AnchorStyles.Bottom;
+			lblDepartment.AutoSize = true;
+			lblDepartment.Font = new Font("Segoe UI", 9.75F, FontStyle.Regular, GraphicsUnit.Point, 204);
+			lblDepartment.Location = new Point(228, 62);
+			lblDepartment.Name = "lblDepartment";
+			lblDepartment.Size = new Size(44, 17);
+			lblDepartment.TabIndex = 14;
+			lblDepartment.Text = "Отдел";
 			// 
 			// cbPost
 			// 
@@ -294,7 +294,7 @@
 		private Button btnResetSearch;
 		private ContextMenuStrip contextMenuStrip1;
 		private ComboBox cbDepartment;
-		private Label label3;
+		private Label lblDepartment;
 		private ComboBox cbPost;
 		private Label label4;
 		private Label label5;

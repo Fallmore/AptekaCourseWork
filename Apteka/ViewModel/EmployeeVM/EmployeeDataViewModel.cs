@@ -47,7 +47,7 @@ namespace Apteka.ViewModel.EmployeeVM
 						"birthday, id_post, id_department) VALUES ({0}, {1}, {2}, {3}, {4}, {5}, {6}) " +
 						"RETURNING id_employee",
 						e.Surname, e.Name, e.Patronymic, e.Address,
-						e.Birthday, e.IdPost, e.IdDepartment).First();
+						e.Birthday, e.IdPost, e.IdDepartment).AsEnumerable().First();
 				}
 				else
 				{

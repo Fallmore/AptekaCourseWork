@@ -1,4 +1,5 @@
 using Apteka.View.MenuV;
+using Apteka.View.LoginV;
 using Apteka.ViewModel;
 
 namespace Apteka
@@ -15,7 +16,7 @@ namespace Apteka
 			// see https://aka.ms/applicationconfiguration.
 			ApplicationConfiguration.Initialize();
 			GeneralViewModel.Instance.Initialize();
-			Application.Run(new OnlyMenuForm());
+			Application.Run(new LoginForm());
 			GeneralViewModel.Instance.DatabaseNotificationService.Dispose();
 		}
 	}

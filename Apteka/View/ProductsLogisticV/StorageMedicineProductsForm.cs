@@ -2,6 +2,7 @@
 using Apteka.Model;
 using Apteka.View;
 using Apteka.ViewModel;
+using Apteka.ViewModel.EmployeeVM;
 using Apteka.ViewModel.ProductsLogisticVM;
 using Microsoft.EntityFrameworkCore.ChangeTracking.Internal;
 using System.Data;
@@ -24,6 +25,8 @@ namespace Apteka
 			SetContextMenuStripItems();
 			SubscribeTable();
 			SubscribeDictionaries();
+			_viewModel.General
+				.SetFormByRole(lblDepartment, cbDepartment, dgvStorageMedicineProducts);
 		}
 
 		private void SubscribeTable()
@@ -77,11 +80,15 @@ namespace Apteka
 			contextMenuStrip1.Items.Add("Показать препарат", null,
 				(s, e) => ShowMedicineProduct());
 
-			contextMenuStrip1.Items.Add("Показать продажи препарата с этого места", null,
+			if (_viewModel.General.ChoosedRole != (int)Roles.Сотрудник &&
+				_viewModel.General.ChoosedRole != (int)Roles.Кассир)
+			{
+				contextMenuStrip1.Items.Add("Показать продажи препарата с этого места", null,
 				(s, e) => ShowHistorySale(false));
 
-			contextMenuStrip1.Items.Add("Показать продажи с этого места", null,
-				(s, e) => ShowHistorySale(true));
+				contextMenuStrip1.Items.Add("Показать продажи с этого места", null,
+					(s, e) => ShowHistorySale(true));
+			}
 
 			contextMenuStrip1.Items.Add("-");
 

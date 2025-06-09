@@ -1,5 +1,6 @@
 ﻿using Apteka.Model;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 
 namespace Apteka.Properties.DataSources;
 
@@ -63,10 +64,6 @@ public partial class AptekaContext : DbContext
 	public virtual DbSet<Waybill> Waybills { get; set; }
 
 	public virtual DbSet<WaybillMedicineProduct> WaybillMedicineProducts { get; set; }
-
-	protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
-		=> optionsBuilder.UseNpgsql("Host=localhost;Port=5432;Database=Apteka;Username=postgres;Password=напиши свой");
 
 	protected override void OnModelCreating(ModelBuilder modelBuilder)
 	{
@@ -216,9 +213,9 @@ public partial class AptekaContext : DbContext
 
 		modelBuilder.Entity<HistorySaleMedicineProduct>(entity =>
 		{
-			entity
-				.HasNoKey()
-				.ToTable("history_sale_medicine_product");
+			entity.HasKey(e => new { e.IdSale, e.IdStorage, e.IdPlace, e.IdMedicineProduct });
+
+			entity.ToTable("history_sale_medicine_product");
 
 			entity.Property(e => e.Amount).HasColumnName("amount");
 			entity.Property(e => e.Cost).HasColumnName("cost");

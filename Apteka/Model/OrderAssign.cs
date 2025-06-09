@@ -82,7 +82,7 @@ internal class OrderAssignWrapper
 		Department = oavm.GetDepartment(IdDepartment).First().Name;
 	}
 
-	internal static List<OrderAssignWrapper> ToOrderAssignWrapper(List<OrderAssign> e, OrderAssignViewModel oavm)
+	internal static List<OrderAssignWrapper> ToList(List<OrderAssign> e, OrderAssignViewModel oavm)
 	{
 		List<OrderAssignWrapper> oaw = [];
 

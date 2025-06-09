@@ -1,4 +1,5 @@
 ﻿using Apteka.Model;
+using Apteka.ViewModel.EmployeeVM;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking.Internal;
 
@@ -24,8 +25,15 @@ namespace Apteka.ViewModel.ProductsLogisticVM
 			switch (typeof(T).Name)
 			{
 				case "WaybillWrapper":
-					dgv.DataSource = new SortableBindingList<WaybillWrapper>(
-						WaybillWrapper.ToList(_general.Waybills, this));
+					List<WaybillWrapper> list = WaybillWrapper.ToList(_general.Waybills, this);
+
+					if (_general.ChoosedRole != (int)Roles.Директор)
+						list = list
+							.Where(l => l.IdDepartment == EmployeeAccountViewModel.GetCurrentDepartment())
+							.ToList();
+
+					dgv.DataSource = new SortableBindingList<WaybillWrapper>(list);
+
 					if (dgv.Columns.Contains("IdMedicineProduct"))
 						dgv.Columns["IdMedicineProduct"].Visible =
 						dgv.Columns["IdDepartment"].Visible =

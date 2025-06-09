@@ -1,4 +1,5 @@
 ﻿using Apteka.Model;
+using Apteka.ViewModel.EmployeeVM;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking.Internal;
 using Npgsql;
@@ -22,8 +23,14 @@ namespace Apteka.ViewModel.ProductsLogisticVM
 		/// <param name="dgv"></param>
 		internal void SetDefaultDataSource(DataGridView dgv)
 		{
-			dgv.DataSource = new SortableBindingList<StorageMedicineProductWrapper>(
-				StorageMedicineProductWrapper.ToList(_general.AptekaContext.StorageMedicineProducts.AsNoTracking().ToList(), this));
+			List<StorageMedicineProductWrapper> list = StorageMedicineProductWrapper.ToList(_general.StorageMedicineProducts, this);
+
+			if (_general.ChoosedRole != (int)Roles.Директор)
+				list = list
+					.Where(l => l.IdDepartment == EmployeeAccountViewModel.GetCurrentDepartment())
+					.ToList();
+
+			dgv.DataSource = new SortableBindingList<StorageMedicineProductWrapper>(list);
 
 			if (dgv.Columns.Contains("IdMedicineProduct"))
 				dgv.Columns["IdMedicineProduct"].Visible =

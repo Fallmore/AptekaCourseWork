@@ -25,6 +25,7 @@ namespace Apteka.View.EmployeeV
 			SetDefaultDates();
 			SubscribeTable();
 			SubscribeDictionaries();
+			_viewModel.General.SetFormByRole(lblDepartment, cbDepartment, dgvEmployees);
 		}
 
 		private void SubscribeTable()
@@ -79,6 +80,15 @@ namespace Apteka.View.EmployeeV
 				{
 					RefreshDataSimple<EmployeeAccount>(
 					value => _viewModel.General.EmployeeAccounts = value,
+					_viewModel.General);
+
+				});
+
+			_viewModel.General.DatabaseNotificationService.Subscribe<EmployeesForm>("employee_fired",
+				data =>
+				{
+					RefreshDataSimple<EmployeeFired>(
+					value => _viewModel.General.EmployeeFireds = value,
 					_viewModel.General);
 
 				});
@@ -165,7 +175,7 @@ namespace Apteka.View.EmployeeV
 			}
 
 			dgvEmployees.DataSource = new SortableBindingList<EmployeeWrapper>(
-				EmployeeWrapper.ToEmployeeWrapper(results, _viewModel));
+				EmployeeWrapper.ToList(_viewModel.GetCurrentEmployees(results), _viewModel));
 			btnResetSearch.Enabled = true;
 		}
 

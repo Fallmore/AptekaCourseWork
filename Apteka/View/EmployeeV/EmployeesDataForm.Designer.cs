@@ -83,7 +83,7 @@
 			tbSurname.Location = new Point(12, 77);
 			tbSurname.Name = "tbSurname";
 			tbSurname.Size = new Size(398, 29);
-			tbSurname.TabIndex = 4;
+			tbSurname.TabIndex = 0;
 			tbSurname.KeyPress += TextBoxKeyPress;
 			// 
 			// label3
@@ -102,7 +102,7 @@
 			tbPatronymic.Location = new Point(12, 197);
 			tbPatronymic.Name = "tbPatronymic";
 			tbPatronymic.Size = new Size(398, 29);
-			tbPatronymic.TabIndex = 6;
+			tbPatronymic.TabIndex = 2;
 			tbPatronymic.KeyPress += TextBoxKeyPress;
 			// 
 			// label4
@@ -121,7 +121,7 @@
 			tbAddress.Location = new Point(12, 257);
 			tbAddress.Name = "tbAddress";
 			tbAddress.Size = new Size(398, 29);
-			tbAddress.TabIndex = 8;
+			tbAddress.TabIndex = 3;
 			// 
 			// label5
 			// 
@@ -160,7 +160,7 @@
 			btnOK.Location = new Point(12, 480);
 			btnOK.Name = "btnOK";
 			btnOK.Size = new Size(161, 42);
-			btnOK.TabIndex = 15;
+			btnOK.TabIndex = 7;
 			btnOK.Text = "Принять";
 			btnOK.UseVisualStyleBackColor = true;
 			btnOK.Click += btnOK_Click;
@@ -172,7 +172,7 @@
 			button2.Location = new Point(249, 480);
 			button2.Name = "button2";
 			button2.Size = new Size(161, 42);
-			button2.TabIndex = 16;
+			button2.TabIndex = 8;
 			button2.Text = "Отмена";
 			button2.UseVisualStyleBackColor = true;
 			// 
@@ -183,7 +183,7 @@
 			dtpBirthday.MinDate = new DateTime(1940, 1, 1, 0, 0, 0, 0);
 			dtpBirthday.Name = "dtpBirthday";
 			dtpBirthday.Size = new Size(200, 29);
-			dtpBirthday.TabIndex = 17;
+			dtpBirthday.TabIndex = 4;
 			// 
 			// cbPost
 			// 
@@ -193,7 +193,7 @@
 			cbPost.Location = new Point(12, 377);
 			cbPost.Name = "cbPost";
 			cbPost.Size = new Size(398, 29);
-			cbPost.TabIndex = 18;
+			cbPost.TabIndex = 5;
 			// 
 			// cbDepartment
 			// 
@@ -203,7 +203,7 @@
 			cbDepartment.Location = new Point(12, 437);
 			cbDepartment.Name = "cbDepartment";
 			cbDepartment.Size = new Size(398, 29);
-			cbDepartment.TabIndex = 20;
+			cbDepartment.TabIndex = 6;
 			// 
 			// label8
 			// 
@@ -249,6 +249,7 @@
 			Controls.Add(label1);
 			FormBorderStyle = FormBorderStyle.FixedToolWindow;
 			Name = "EmployeesDataForm";
+			StartPosition = FormStartPosition.CenterScreen;
 			Text = "Данные сотрудника";
 			ResumeLayout(false);
 			PerformLayout();

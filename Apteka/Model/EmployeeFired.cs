@@ -70,7 +70,7 @@ internal class EmployeeFiredWrapper
 		Post = p.Name;
 	}
 
-	internal static List<EmployeeFiredWrapper> ToEmployeeFiredWrapper(List<EmployeeFired> e, EmployeeFiredViewModel evm)
+	internal static List<EmployeeFiredWrapper> ToList(List<EmployeeFired> e, EmployeeFiredViewModel evm)
 	{
 		List<EmployeeFiredWrapper> ew = [];
 

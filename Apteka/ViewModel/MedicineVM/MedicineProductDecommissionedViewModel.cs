@@ -30,16 +30,6 @@ namespace Apteka.ViewModel.MedicineVM
 		}
 
 		/// <summary>
-		/// Обновляет данные склада таблицы
-		/// </summary>
-		/// <param name="dgv"></param>
-		internal void RefreshMedicineProductDecommissioned(DataGridView dgv)
-		{
-			_general.LoadTableForWrite<MedicineProductDecommissioned>();
-			SetDefaultDataSource(dgv);
-		}
-
-		/// <summary>
 		/// Настраивает таблицу под вывод данных склада
 		/// </summary>
 		/// <param name="dgv"></param>

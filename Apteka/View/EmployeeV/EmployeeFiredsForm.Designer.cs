@@ -43,7 +43,7 @@
 			label7 = new Label();
 			label5 = new Label();
 			cbDepartment = new ComboBox();
-			label3 = new Label();
+			lblDepartment = new Label();
 			cbPost = new ComboBox();
 			label4 = new Label();
 			btnResetSearch = new Button();
@@ -81,7 +81,7 @@
 			splitContainer1.Panel1.Controls.Add(label7);
 			splitContainer1.Panel1.Controls.Add(label5);
 			splitContainer1.Panel1.Controls.Add(cbDepartment);
-			splitContainer1.Panel1.Controls.Add(label3);
+			splitContainer1.Panel1.Controls.Add(lblDepartment);
 			splitContainer1.Panel1.Controls.Add(cbPost);
 			splitContainer1.Panel1.Controls.Add(label4);
 			splitContainer1.Panel1.Controls.Add(btnResetSearch);
@@ -236,16 +236,16 @@
 			cbDepartment.Size = new Size(210, 25);
 			cbDepartment.TabIndex = 15;
 			// 
-			// label3
+			// lblDepartment
 			// 
-			label3.Anchor = AnchorStyles.Top | AnchorStyles.Bottom;
-			label3.AutoSize = true;
-			label3.Font = new Font("Segoe UI", 9.75F, FontStyle.Regular, GraphicsUnit.Point, 204);
-			label3.Location = new Point(228, 62);
-			label3.Name = "label3";
-			label3.Size = new Size(44, 17);
-			label3.TabIndex = 14;
-			label3.Text = "Отдел";
+			lblDepartment.Anchor = AnchorStyles.Top | AnchorStyles.Bottom;
+			lblDepartment.AutoSize = true;
+			lblDepartment.Font = new Font("Segoe UI", 9.75F, FontStyle.Regular, GraphicsUnit.Point, 204);
+			lblDepartment.Location = new Point(228, 62);
+			lblDepartment.Name = "lblDepartment";
+			lblDepartment.Size = new Size(44, 17);
+			lblDepartment.TabIndex = 14;
+			lblDepartment.Text = "Отдел";
 			// 
 			// cbPost
 			// 
@@ -347,7 +347,7 @@
 		private Button btnResetSearch;
 		private ContextMenuStrip contextMenuStrip1;
 		private ComboBox cbDepartment;
-		private Label label3;
+		private Label lblDepartment;
 		private ComboBox cbPost;
 		private Label label4;
 		private Label label5;

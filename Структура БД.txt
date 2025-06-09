@@ -659,9 +659,9 @@ BEGIN
 			WHEN role = 2 THEN
 				EXECUTE format('GRANT apteka_g_cashier TO %I', NEW.login);
 			WHEN role = 3 THEN
-				EXECUTE format('GRANT apteka_g_department_manager TO %I', NEW.login);
+				EXECUTE format('GRANT apteka_g_department_manager TO %I WITH ADMIN OPTION', NEW.login);
 			WHEN role = 4 THEN
-				EXECUTE format('GRANT apteka_g_director TO %I', NEW.login);
+				EXECUTE format('GRANT apteka_g_director TO %I WITH ADMIN OPTION', NEW.login);
 		END CASE;
     END LOOP;
 	
@@ -675,8 +675,8 @@ BEFORE INSERT ON employee_account
 FOR EACH ROW
 EXECUTE FUNCTION create_employee_account();
 
-CREATE OR REPLACE FUNCTION control_privileges(_roles int[], _id_employee uuid)
-RETURNS void AS $$
+CREATE OR REPLACE PROCEDURE control_privileges(_roles int[], _id_employee uuid)
+AS $$
 DECLARE
 	role int;
 	login_employee varchar;
@@ -717,9 +717,9 @@ BEGIN
 			WHEN role = 2 THEN
 				EXECUTE format('GRANT apteka_g_cashier TO %I', login_employee);
 			WHEN role = 3 THEN
-				EXECUTE format('GRANT apteka_g_department_manager TO %I', login_employee);
+				EXECUTE format('GRANT apteka_g_department_manager TO %I WITH ADMIN OPTION', login_employee);
 			WHEN role = 4 THEN
-				EXECUTE format('GRANT apteka_g_director TO %I', login_employee);
+				EXECUTE format('GRANT apteka_g_director TO %I WITH ADMIN OPTION', login_employee);
 		END CASE;
     	END LOOP;
 	END IF;
@@ -763,40 +763,34 @@ CREATE OR REPLACE FUNCTION check_enter_in_employee_account(_login varchar, _pass
 RETURNS varchar AS $$
 DECLARE
 	_hash_password varchar := null;
-	_id_employee uuid;
+    _id_employee uuid;
+    _is_authorized boolean;
 BEGIN
-    IF (SELECT NOT EXISTS(
-    		SELECT id_employee INTO _id_employee
-    		FROM employee_account 
-    		WHERE login = CONCAT('apteka_u_', _login)
-    		AND password = crypt(_password, password)
-		))
-	THEN 
-		RETURN _hash_password;
-	END IF;
-	
-	IF (SELECT EXISTS(
-    		SELECT 1 
-    		FROM employee_account 
-    		WHERE id_employee = _id_employee
-			AND online = true
-		))
-	THEN
-		RAISE EXCEPTION 'Вы уже авторизованы в программе на другом устройстве!';
-	END IF;
+    -- Получаем id_employee и проверяем авторизацию
+    SELECT ea.id_employee, ea.password, ea.online
+    INTO _id_employee, _hash_password, _is_authorized
+    FROM employee_account ea
+    WHERE ea.login = CONCAT('apteka_u_', _login)
+    AND ea.password = crypt(_password, ea.password);
 
-	SELECT password INTO _hash_password
-    FROM employee_account 
-    WHERE login = CONCAT('apteka_u_', _login);
+    -- Если запись не найдена
+    IF _id_employee IS NULL THEN
+        RAISE EXCEPTION 'Неверный логин или пароль!';
+    END IF;
 
-	UPDATE employee_account 
-	SET online = true
+    -- Если пользователь уже онлайн
+    IF _is_authorized THEN
+        RAISE EXCEPTION 'Вы уже авторизованы в программе на другом устройстве!';
+    END IF;
+
+    -- Обновляем статус онлайн
+    UPDATE employee_account 
+    SET online = true
     WHERE id_employee = _id_employee;
 	
 	RETURN _hash_password;
 END;
 $$ LANGUAGE plpgsql;
-
 
 
 CREATE OR REPLACE PROCEDURE log_out_employee_account()
@@ -848,11 +842,12 @@ FOR EACH ROW EXECUTE FUNCTION count_cost();
 
 
 
-CREATE OR REPLACE FUNCTION get_medicine_product_sales(_id_medicine_product uuid) 
-RETURNS TABLE (amount real, cost real, month text) AS $$
+CREATE OR REPLACE FUNCTION get_medicine_product_sales(
+_id_medicine_product uuid, _id_department int, _date_min timestamp, _date_max timestamp) 
+RETURNS TABLE ("Количество" real, "Месяц" text) AS $$
 BEGIN
     RETURN QUERY(WITH medicine_product_sale AS (
-				SELECT hs.amount am, hs.cost ct, (SELECT 
+				SELECT hsmp.amount am, (SELECT 
     				CASE extract(MONTH FROM hs.date_sale)
         				WHEN 1 THEN 'Январь'
         				WHEN 2 THEN 'Февраль'
@@ -866,14 +861,17 @@ BEGIN
         				WHEN 10 THEN 'Октябрь'
         				WHEN 11 THEN 'Ноябрь'
         				WHEN 12 THEN 'Декабрь'
-    				END) AS mth
-				FROM history_sale hs
-				WHERE hs.id_medicine_product = _id_medicine_product
+    				END) AS mnth
+				FROM history_sale_medicine_product hsmp
+				JOIN history_sale hs ON hs.id_sale = hsmp.id_sale 
+										AND _id_department = -1 OR hs.id_department = _id_department
+				WHERE hsmp.id_medicine_product = _id_medicine_product
+					AND hs.date_sale >= _date_min AND hs.date_sale <= _date_max
 				ORDER BY hs.date_sale
 			)
-			SELECT SUM(mps.am), SUM(mps.ct), mps.mth
+			SELECT SUM(mps.am), mps.mnth
 			FROM medicine_product_sale mps
-			GROUP BY mth);
+			GROUP BY mnth);
 END;
 $$ LANGUAGE plpgsql;
 
@@ -885,49 +883,28 @@ RETURNS TABLE ("Серийный номер" varchar,"Наименование" 
 AS $$
 BEGIN
     RETURN QUERY(SELECT mp.serial_number, mp.name, 
-					(smp.amount - COALESCE(w.amount, 0) + COALESCE(hs.amount, 0) + COALESCE(mpd.amount, 0)), 
-					COALESCE(hs.amount, 0), COALESCE(w.amount, 0), COALESCE(mpd.amount, 0), 
+					(smp.amount - COALESCE(wmp.amount, 0) + COALESCE(hsmp.amount, 0) + COALESCE(mpd.amount, 0)), 
+					COALESCE(hsmp.amount, 0), COALESCE(wmp.amount, 0), COALESCE(mpd.amount, 0), 
 					smp.amount
-				FROM medicine_product mp 
-				RIGHT JOIN storage_medicine_product smp
-					ON smp.id_medicine_product = mp.id_medicine_product
-					AND smp.id_department = _id_department
-				LEFT JOIN waybill w 
-					ON w.id_medicine_product = smp.id_medicine_product AND w.date_waybill = now()::date
-					AND w.id_department = _id_department
-				LEFT JOIN history_sale hs 
-					ON smp.id_medicine_product = hs.id_medicine_product AND hs.date_sale::date = now()::date
-					AND hs.id_department = _id_department
-				LEFT JOIN medicine_product_decommissioned mpd 
-					ON smp.id_medicine_product = mpd.id_medicine_product AND mpd.date_decommission::date = now()::date
-					AND mpd.id_department = _id_department);
-END;
-$$ LANGUAGE plpgsql;
-
-
-
-CREATE OR REPLACE FUNCTION get_medicine_product_amount_today() 
-RETURNS TABLE ("Серийный номер" varchar,"Наименование" varchar, "Кол-во утром" real, "Продано" real, 
-				"Принято" real, "Списано" real,  "Кол-во в конце дня" real, "Отдел" varchar) 
-AS $$
-BEGIN
-    RETURN QUERY(SELECT mp.serial_number, mp.name, 
-					(smp.amount - COALESCE(w.amount, 0) + COALESCE(hs.amount, 0) + COALESCE(mpd.amount, 0)), 
-					COALESCE(hs.amount, 0), COALESCE(w.amount, 0), COALESCE(mpd.amount, 0), 
-					smp.amount, d.name
-				FROM medicine_product mp 
-				RIGHT JOIN storage_medicine_product smp
+				FROM storage_medicine_product smp 
+				RIGHT JOIN medicine_product mp
 					ON smp.id_medicine_product = mp.id_medicine_product
 				LEFT JOIN waybill w 
-					ON w.id_medicine_product = smp.id_medicine_product AND w.date_waybill = now()::date
-					AND w.id_department = smp.id_department
+					ON w.date_waybill = now()::date
+					AND (_id_department = -1 OR w.id_department = _id_department)
+				LEFT JOIN waybill_medicine_product wmp
+					ON w.id_waybill = wmp.id_waybill
+					AND wmp.id_medicine_product = smp.id_medicine_product
 				LEFT JOIN history_sale hs 
-					ON smp.id_medicine_product = hs.id_medicine_product AND hs.date_sale::date = now()::date
-					AND hs.id_department = w.id_department
+					ON hs.date_sale::date = now()::date
+					AND (_id_department = -1 OR hs.id_department = _id_department)
+				LEFT JOIN history_sale_medicine_product hsmp
+					ON hs.id_sale = hsmp.id_sale
+					AND smp.id_medicine_product = hsmp.id_medicine_product
 				LEFT JOIN medicine_product_decommissioned mpd 
-					ON smp.id_medicine_product = mpd.id_medicine_product AND mpd.date_decommission::date = now()::date
-					AND mpd.id_department = hs.id_department
-				LEFT JOIN department d ON d.id_department = smp.id_department);
+					ON smp.id_medicine_product = mpd.id_medicine_product 
+					AND mpd.date_decommission::date = now()::date
+				WHERE _id_department = -1 OR smp.id_department = _id_department);
 END;
 $$ LANGUAGE plpgsql;
 
@@ -1252,66 +1229,65 @@ GRANT CONNECT ON DATABASE "Apteka" TO apteka_g_employee;
 GRANT USAGE ON SCHEMA public TO apteka_g_employee;
 GRANT SELECT ON ALL SEQUENCES IN SCHEMA public TO apteka_g_employee;
 GRANT EXECUTE ON FUNCTION 
-	check_password(_password varchar), check_roles(_roles int[]),
-	check_enter_in_employee_account(_login varchar, _password varchar),
-	check_expired_medicine_product(), uuid_generate_v4(),
-	gen_salt(text), crypt(text, text), similarity(text,text),
-	search_medicine_products_trgm(
-		_search_text TEXT,
-    		_medicine_id INT,
-    		_serial_number TEXT,
-    		_form TEXT,
-    		_min_amount REAL,
-    		_max_amount REAL,
-    		_way_enter TEXT,
-    		_packaging_form TEXT,
-    		_producer TEXT,
-    		_min_date_release DATE,
-    		_max_date_release DATE,
-    		_min_date_expiration DATE,
-    		_max_date_expiration DATE,
-    		decommissioned BOOLEAN,
-		_pharm_group TEXT,
-		_condition_release TEXT,
-    		_component_name TEXT,
-    		_component_measure TEXT,
-    		_similarity_threshold REAL,
-    		_limit INT,
-    		_offset INT
-	)
+	check_password(VARCHAR), check_roles(INT[]), get_current_department(),
+	get_current_employee(), get_medicine_products_analogues(UUID),
+	check_enter_in_employee_account(VARCHAR, VARCHAR),	
+	check_expired_medicine_product(INTerval), UUID_generate_v4(),
+	gen_salt(TEXT), crypt(TEXT, TEXT), similarity(TEXT, TEXT),
+	search_medicine_products_trgm(TEXT, INT, TEXT, TEXT, REAL, REAL, 
+		TEXT, TEXT, TEXT, DATE, DATE, DATE, DATE, BOOLEAN, BOOLEAN, TEXT, 
+		TEXT, TEXT, TEXT, TEXT, REAL, INT, INT), 
+	search_medicine_trgm(VARCHAR, VARCHAR, VARCHAR, TEXT, INT, INT),
+	search_storage_medicine_product(INT, INT, INT, UUID, TEXT, INT, INT),
+	search_medicine_product_decommissioned_trgm(UUID, TEXT, TEXT,
+		timestamp, timestamp, INT, INT)
 	TO apteka_g_employee;
+GRANT EXECUTE ON PROCEDURE log_out_employee_account() TO apteka_g_employee;
+GRANT UPDATE ON TABLE employee_account TO apteka_g_employee;
 GRANT SELECT ON TABLE 
 	employee, employee_account, employee_role, order_assign, post,
 	department, storage_pharmacy, storage_place, storage_medicine_product,
 	medicine, medicine_form, medicine_packaging_form, medicine_producer, 
 	medicine_product, medicine_product_decommissioned, medicine_type_form, 
-	medicine_way_enter, measure_measurability
+	medicine_way_enter, measure_measurability, medicine_cost
 	TO apteka_g_employee;
 
 CREATE GROUP apteka_g_cashier WITH INHERIT;
 GRANT apteka_g_employee TO apteka_g_cashier;
-GRANT EXECUTE ON FUNCTION get_current_employee() TO apteka_g_cashier;
-GRANT INSERT ON TABLE history_sale TO apteka_g_cashier;
+GRANT EXECUTE ON FUNCTION count_cost(UUID, FLOAT) TO apteka_g_cashier;
+GRANT INSERT ON TABLE history_sale, history_sale_medicine_product TO apteka_g_cashier;
 GRANT UPDATE ON TABLE storage_medicine_product TO apteka_g_cashier;
 
 CREATE GROUP apteka_g_department_manager WITH INHERIT;
+ALTER GROUP apteka_g_department_manager WITH CREATEROLE;
 GRANT apteka_g_employee TO apteka_g_department_manager;
 GRANT EXECUTE ON FUNCTION
-	get_current_employee(), get_medicine_product_amount_today(), 
-	get_medicine_product_amount_today(_id_department int),
-	get_medicine_product_sales(_id_medicine_product uuid)
+	check_critical_amount_medicine_product(REAL),
+	get_medicine_product_amount_today(INT),
+	get_medicine_product_sales(UUID, INT, timestamp, timestamp),
+	search_sale(INT, INT, INT, UUID, TEXT, timestamp, timestamp,
+		UUID, INT, INT),
+	search_employees_trgm(UUID, VARCHAR, VARCHAR,
+		INT, INT, date, date, INT, INT),
+	search_waybill(INT, UUID, UUID, INT, INT,
+		date, date, INT, INT)
 	TO apteka_g_department_manager;
 GRANT EXECUTE ON PROCEDURE 
-	decomission_medicine_product(_id_medicine_product uuid, _reason character varying),
-	clear_employee_data(), clear_medicine_product_sales()
+	decommission_medicine_product(UUID, VARCHAR),
+	employee_assign_order(INT, UUID, INT, TEXT),
+	clear_employee_data(), clear_medicine_product_sales(), control_privileges(INT[], UUID),
+	delete_medicine_product(UUID)
 	TO apteka_g_department_manager;
+GRANT SELECT ON TABLE history_sale, history_sale_medicine_product TO apteka_g_department_manager;
 GRANT SELECT, UPDATE, INSERT ON TABLE
 	employee, employee_account, employee_fired, order_assign, 
 	storage_pharmacy, storage_place, storage_medicine_product, medicine_producer, 
-	medicine_product, medicine_product_decommissioned, supplier, waybill
+	medicine_product, medicine_product_decommissioned, supplier, waybill,
+	waybill_medicine_product
 	TO apteka_g_department_manager;
 
 CREATE GROUP apteka_g_director WITH INHERIT;
+ALTER GROUP apteka_g_director WITH CREATEROLE;
 GRANT apteka_g_department_manager TO apteka_g_director;
 
 
@@ -1528,6 +1504,21 @@ WHERE
 DROP SEQUENCE waybill_seq;
 
 
-
+INSERT INTO employee_account (id_employee, login, password, roles)
+VALUES ((SELECT id_employee
+	FROM employee
+	WHERE surname = 'Кузнецова'), 'test', 'Password123', '{1,2}'),
+	((SELECT id_employee
+	FROM employee
+	WHERE surname = 'Сидоров'), 'Sidorov', 'Sidorov123', '{1}'),
+	((SELECT id_employee
+	FROM employee
+	WHERE surname = 'Фёдоров'), 'Fodorov', 'Fodorov123', '{1,2}'),
+	((SELECT id_employee
+	FROM employee
+	WHERE surname = 'Петрова'), 'Petrova', 'Petrova123', '{1,2,3}'),
+	((SELECT id_employee
+	FROM employee
+	WHERE patronymic = 'Олегович'), 'Olegovich', 'Olegovich123', '{1,4}');
 
 

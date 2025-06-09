@@ -83,7 +83,7 @@ internal class EmployeeWrapper
 		Salary = p.Salary;
 	}
 
-	internal static List<EmployeeWrapper> ToEmployeeWrapper(List<Employee> e, EmployeeViewModel evm)
+	internal static List<EmployeeWrapper> ToList(List<Employee> e, EmployeeViewModel evm)
 	{
 		List<EmployeeWrapper> ew = [];
 

@@ -29,13 +29,24 @@ namespace Apteka.ViewModel.MenuVM
 			_general.ConfigureGrid<T>(dgv);
 		}
 
-		internal List<StorageMedicineProduct> GetStorageMedicineProductsForSale(Guid? id = null)
+		internal List<StorageMedicineProduct> FilterCurrentDepartment(List<StorageMedicineProduct> list)
 		{
-			List<Guid> lg = _general.MedicineProducts
-					.Where(mp => mp.Decommissioned == false
-						&& !General.MedicineProductsExpired.Contains(mp.IdMedicineProduct))
+			return list.Where(l => l.IdDepartment == _general.ChoosedRole)
+				.ToList();
+		}
+
+		internal List<Guid> FilterForSale(List<MedicineProduct> list)
+		{
+			return list.Where(mp => mp.Decommissioned == false
+						&& !_general.MedicineProductsExpired.Contains(mp.IdMedicineProduct))
 					.Select(mp => mp.IdMedicineProduct)
 					.ToList();
+		}
+
+		internal List<StorageMedicineProduct> GetStorageMedicineProductsForSale(Guid? id = null)
+		{
+			List<Guid> lg = FilterForSale(_general.MedicineProducts);
+
 			List<StorageMedicineProduct> lsmp = _general.StorageMedicineProducts
 				.Where(smp => lg.Contains(smp.IdMedicineProduct))
 				.ToList();
@@ -43,7 +54,7 @@ namespace Apteka.ViewModel.MenuVM
 			if (id != null)
 				lsmp = lsmp.Where(mp => mp.IdMedicineProduct == id).ToList();
 
-			return lsmp;
+			return FilterCurrentDepartment(lsmp);
 		}
 
 		internal async Task<List<StorageMedicineProduct>?> SearchStorageMedicineProductsForSale(string textSearch)
@@ -63,31 +74,24 @@ namespace Apteka.ViewModel.MenuVM
 
 			if (results == null) return null;
 
-			List<Guid> lg = results
-					.Where(mp => !General.MedicineProductsExpired.Contains(mp.IdMedicineProduct))
-					.Select(mp => mp.IdMedicineProduct)
-					.ToList();
+			List<Guid> lg = FilterForSale(results);
 
 			List<StorageMedicineProduct> lsmp = _general.StorageMedicineProducts
 				.Where(smp => lg.Contains(smp.IdMedicineProduct))
 				.ToList();
 
-			return lsmp;
+			return FilterCurrentDepartment(lsmp);
 		}
 
 		internal List<StorageMedicineProduct> GetStorageMedicineProductsAnaloguesForSale(Guid id)
 		{
-			List<Guid> lg = _general.AptekaContext.MedicineProducts
+			List<Guid> lg = FilterForSale(_general.AptekaContext.MedicineProducts
 				.FromSqlRaw("SELECT * FROM get_medicine_products_analogues({0})", id)
-				.AsEnumerable()
-				.Where(mp => mp.Decommissioned == false
-					&& !General.MedicineProductsExpired.Contains(mp.IdMedicineProduct))
-				.Select(mp => mp.IdMedicineProduct)
-				.ToList();
+				.AsEnumerable().ToList());
 			List<StorageMedicineProduct> lsmp = _general.StorageMedicineProducts
 				.Where(smp => lg.Contains(smp.IdMedicineProduct))
 				.ToList();
-			return lsmp;
+			return FilterCurrentDepartment(lsmp);
 		}
 
 		internal async Task<List<StorageMedicineProduct>?> SearchAnaloguesMedicineProductsForSale(Guid id, string textSearch)
@@ -107,13 +111,9 @@ namespace Apteka.ViewModel.MenuVM
 
 			if (results == null) return null;
 
-			List<Guid> lgAllAnalogues = _general.AptekaContext.MedicineProducts
+			List<Guid> lgAllAnalogues = FilterForSale(_general.AptekaContext.MedicineProducts
 				.FromSqlRaw("SELECT * FROM get_medicine_products_analogues({0})", id)
-				.AsEnumerable()
-				.Where(mp => mp.Decommissioned == false
-					&& !General.MedicineProductsExpired.Contains(mp.IdMedicineProduct))
-				.Select(mp => mp.IdMedicineProduct)
-				.ToList();
+				.AsEnumerable().ToList());
 
 			List<Guid> lgNeedAnalogues = results
 					.Select(mp => mp.IdMedicineProduct)
@@ -124,7 +124,7 @@ namespace Apteka.ViewModel.MenuVM
 				.Where(smp => lgNeedAnalogues.Contains(smp.IdMedicineProduct))
 				.ToList();
 
-			return lsmp;
+			return FilterCurrentDepartment(lsmp);
 		}
 
 		internal float CountCost(Guid id, float amount)
@@ -150,6 +150,25 @@ namespace Apteka.ViewModel.MenuVM
 				MessageBox.Show(message, "Ошибка данных",
 						MessageBoxButtons.OK, MessageBoxIcon.Error);
 				return false;
+			}
+		}
+
+		internal void RemoveSale(HistorySale hs)
+		{
+			try
+			{
+				HistorySale? sale = General.AptekaContext.HistorySales.Find(hs.IdSale);
+
+				if (sale != null)
+					General.AptekaContext.HistorySales.Remove(sale);
+				General.AptekaContext.SaveChanges();
+			}
+			catch (PostgresException ex)
+			{
+				string message = ex.Message;
+
+				MessageBox.Show(message, "Ошибка данных",
+						MessageBoxButtons.OK, MessageBoxIcon.Error);
 			}
 		}
 
