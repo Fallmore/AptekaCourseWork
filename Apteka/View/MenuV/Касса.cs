@@ -1,6 +1,6 @@
 ﻿using Apteka.BaseClasses;
 using Apteka.Model;
-using Apteka.View;
+using Apteka.View.MedicineV;
 using Apteka.View.SimpleV;
 using Apteka.ViewModel.EmployeeVM;
 using Apteka.ViewModel.MenuVM;
@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore.ChangeTracking.Internal;
 using System.ComponentModel;
 using System.Diagnostics;
 
-namespace Apteka
+namespace Apteka.View.MenuV
 {
 	public partial class Касса : FormWithNotification
 	{

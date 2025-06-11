@@ -1,6 +1,5 @@
 ﻿using Apteka.BaseClasses;
 using Apteka.Model;
-using Apteka.View.Medicine;
 using Apteka.ViewModel;
 using Apteka.ViewModel.MedicineVM;
 using Microsoft.EntityFrameworkCore.ChangeTracking.Internal;
@@ -8,7 +7,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System.Data;
 
-namespace Apteka.View.ProductsLogisticV
+namespace Apteka.View.MedicineV
 {
 	public partial class MedicineProductDataForm : FormWithNotification
 	{

@@ -1,4 +1,4 @@
-﻿namespace Apteka
+﻿namespace Apteka.View.ProductsLogisticV
 {
     partial class StorageMedicineProductsForm
     {

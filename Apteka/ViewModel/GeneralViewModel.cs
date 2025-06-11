@@ -21,8 +21,8 @@ namespace Apteka.ViewModel
 		private FormCollection _fc;
 
 		private string _mainUsername = "postgres";
-		#error Впиши свой пароль к БД
-		private string _mainPassword = "";
+		//#error Впиши свой пароль к БД
+		private string _mainPassword = "slavik242";
 		private int _ChoosedRole;
 
 		#region Данные таблиц БД

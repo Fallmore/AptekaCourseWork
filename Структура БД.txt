@@ -26,14 +26,13 @@ CREATE TABLE employee (
 	id_employee uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
 	surname varchar(50) NOT NULL,
 	name varchar(50) NOT NULL,
-	patronymic varchar(50) NOT NULL,
+	patronymic varchar(50),
 	address varchar NOT NULL,
 	birthday date NOT NULL,
 	id_post int NOT NULL REFERENCES post,
 	id_department int NOT NULL REFERENCES department DEFAULT get_current_department(),
 	CONSTRAINT empty_surname CHECK (trim(surname) <> ''),
 	CONSTRAINT empty_name CHECK (trim(name) <> ''),
-	CONSTRAINT empty_patronymic CHECK (trim(patronymic) <> ''),
 	CONSTRAINT empty_address CHECK (trim(patronymic) <> ''),
 	CONSTRAINT wrong_birthday CHECK (now() - birthday >= interval '18 years')
 );
@@ -148,7 +147,7 @@ CREATE TABLE medicine_product (
 	amount real NOT NULL,
 	components jsonb NOT NULL,
 	way_enter varchar NOT NULL REFERENCES medicine_way_enter,
-	dosage_mode text NOT NULL,
+		text NOT NULL,
 	packaging_form varchar NOT NULL REFERENCES medicine_packaging_form,
 	producer varchar NOT NULL REFERENCES medicine_producer,
 	date_release date NOT NULL,
@@ -1255,6 +1254,7 @@ GRANT SELECT ON TABLE
 CREATE GROUP apteka_g_cashier WITH INHERIT;
 GRANT apteka_g_employee TO apteka_g_cashier;
 GRANT EXECUTE ON FUNCTION count_cost(UUID, FLOAT) TO apteka_g_cashier;
+GRANT SELECT ON TABLE history_sale TO apteka_g_cashier;
 GRANT INSERT ON TABLE history_sale, history_sale_medicine_product TO apteka_g_cashier;
 GRANT UPDATE ON TABLE storage_medicine_product TO apteka_g_cashier;
 
@@ -1507,18 +1507,18 @@ DROP SEQUENCE waybill_seq;
 INSERT INTO employee_account (id_employee, login, password, roles)
 VALUES ((SELECT id_employee
 	FROM employee
-	WHERE surname = 'Кузнецова'), 'test', 'Password123', '{1,2}'),
+	WHERE surname = 'Кузнецова'), 'Кассир', 'Кассир123', '{1,2}'),
 	((SELECT id_employee
 	FROM employee
-	WHERE surname = 'Сидоров'), 'Sidorov', 'Sidorov123', '{1}'),
+	WHERE surname = 'Сидоров'), 'Сотрудник', 'Сотрудник123', '{1}'),
 	((SELECT id_employee
 	FROM employee
-	WHERE surname = 'Фёдоров'), 'Fodorov', 'Fodorov123', '{1,2}'),
+	WHERE surname = 'Фёдоров'), 'Кассир2', 'Кассир2123', '{1,2}'),
 	((SELECT id_employee
 	FROM employee
-	WHERE surname = 'Петрова'), 'Petrova', 'Petrova123', '{1,2,3}'),
+	WHERE surname = 'Петрова'), 'Управляющий', 'Управляющий123', '{1,2,3}'),
 	((SELECT id_employee
 	FROM employee
-	WHERE patronymic = 'Олегович'), 'Olegovich', 'Olegovich123', '{1,4}');
+	WHERE patronymic = 'Олегович'), 'Директор', 'Директор123', '{1,4}');
 
 

@@ -1,6 +1,6 @@
 ﻿using Apteka.View;
 
-namespace Apteka
+namespace Apteka.View.MedicineV
 {
 	partial class MedicineProductsForm
 	{

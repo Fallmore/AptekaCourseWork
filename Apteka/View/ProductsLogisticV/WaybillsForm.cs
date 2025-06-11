@@ -1,6 +1,7 @@
 ﻿using Apteka.BaseClasses;
 using Apteka.Model;
 using Apteka.View.EmployeeV;
+using Apteka.View.MedicineV;
 using Apteka.ViewModel;
 using Apteka.ViewModel.ProductsLogisticVM;
 using Microsoft.EntityFrameworkCore.ChangeTracking.Internal;
@@ -112,12 +113,12 @@ namespace Apteka.View
 			Waybill w = new()
 			{
 				IdWaybill = int.Parse(tbIdWaybill.Text == "" ? "-1" : tbIdWaybill.Text),
-				IdEmployee = Guid.Parse(cbEmployee.SelectedValue.ToString() ?? ""),
-				IdDepartment = int.Parse(cbDepartment.SelectedValue.ToString() ?? "-1"),
-				IdSupplier = int.Parse(cbSupplier.SelectedValue.ToString() ?? "-1"),
+				IdEmployee = Guid.Parse(cbEmployee.SelectedValue?.ToString() ?? ""),
+				IdDepartment = int.Parse(cbDepartment.SelectedValue?.ToString() ?? "-1"),
+				IdSupplier = int.Parse(cbSupplier.SelectedValue?.ToString() ?? "-1"),
 			};
 
-			Guid idMedicineProduct = Guid.Parse(cbMedicineProduct.SelectedValue.ToString() ?? "");
+			Guid idMedicineProduct = Guid.Parse(cbMedicineProduct.SelectedValue?.ToString() ?? "");
 
 			List<Waybill>? results = await _viewModel.SearchWaybillAsync(w, idMedicineProduct,
 				[

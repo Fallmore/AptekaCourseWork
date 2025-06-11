@@ -1,4 +1,4 @@
-﻿namespace Apteka.View.Medicine
+﻿namespace Apteka.View.MedicineV
 {
 	partial class MedicineCostDataForm
 	{

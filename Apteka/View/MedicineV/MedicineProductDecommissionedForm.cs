@@ -1,10 +1,11 @@
 ﻿using Apteka.BaseClasses;
 using Apteka.Model;
+using Apteka.View.ProductsLogisticV;
 using Apteka.ViewModel.MedicineVM;
 using Microsoft.EntityFrameworkCore.ChangeTracking.Internal;
 using System.Data;
 
-namespace Apteka.View
+namespace Apteka.View.MedicineV
 {
 	public partial class MedicineProductDecommissionedForm : FormWithNotification
 	{

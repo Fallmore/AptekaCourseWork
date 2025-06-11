@@ -1,6 +1,7 @@
 ﻿using Apteka.BaseClasses;
 using Apteka.Model;
 using Apteka.View.EmployeeV;
+using Apteka.View.MedicineV;
 using Apteka.ViewModel;
 using Apteka.ViewModel.ProductsLogisticVM;
 using Microsoft.EntityFrameworkCore.ChangeTracking.Internal;

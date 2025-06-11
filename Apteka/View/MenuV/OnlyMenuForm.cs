@@ -1,5 +1,7 @@
 ﻿using Apteka.Model;
 using Apteka.View.EmployeeV;
+using Apteka.View.MedicineV;
+using Apteka.View.ProductsLogisticV;
 using Apteka.View.SimpleV;
 using Apteka.ViewModel;
 using Apteka.ViewModel.MenuVM;
@@ -29,6 +31,7 @@ namespace Apteka.View.MenuV
 					историяПродажToolStripMenuItem.Visible =
 					накладныеToolStripMenuItem.Visible =
 					управляющиеОтделамиToolStripMenuItem.Visible =
+					добавитьНакладныеToolStripMenuItem.Visible =
 					отчетыToolStripMenuItem.Visible = false;
 					break;
 				case (int)Roles.УправляющийОтдела:
@@ -104,7 +107,7 @@ namespace Apteka.View.MenuV
 		{
 			if (DateTime.Now.Hour < _viewModel.General.HourOfEndWork)
 			{
-				MessageBox.Show("Извините, сейчас не конец рабочего дня", "Отчет о наличии ЛП в конце дня",
+				MessageBox.Show(text: "Извините, сейчас не конец рабочего дня", "Отчет о наличии ЛП в конце дня",
 					MessageBoxButtons.OK, MessageBoxIcon.Information);
 				return;
 			}
@@ -216,6 +219,11 @@ namespace Apteka.View.MenuV
 		{
 			var f = ShowForm<EmployeesForm>();
 			f.ShowDepartmentManagers();
+		}
+
+		private void добавитьНакладныеToolStripMenuItem_Click(object sender, EventArgs e)
+		{
+			ShowForm<WaybillDataForm>();
 		}
 	}
 }

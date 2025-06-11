@@ -1,7 +1,7 @@
 ﻿using Apteka.Model;
 using System.Data;
 
-namespace Apteka.View
+namespace Apteka.View.MedicineV
 {
 	public partial class ExtendedSearchMedicneProducts : Form
 	{

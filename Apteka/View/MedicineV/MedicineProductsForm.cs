@@ -1,13 +1,12 @@
 ﻿using Apteka.BaseClasses;
 using Apteka.Model;
-using Apteka.View;
-using Apteka.View.Medicine;
+using Apteka.View.ProductsLogisticV;
 using Apteka.View.SimpleV;
 using Apteka.ViewModel.MedicineVM;
 using Microsoft.EntityFrameworkCore.ChangeTracking.Internal;
 using System.Data;
 
-namespace Apteka
+namespace Apteka.View.MedicineV
 {
 	public partial class MedicineProductsForm : FormWithNotification
 	{

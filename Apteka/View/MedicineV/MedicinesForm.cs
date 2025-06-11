@@ -4,7 +4,7 @@ using Apteka.ViewModel.MedicineVM;
 using Microsoft.EntityFrameworkCore.ChangeTracking.Internal;
 
 
-namespace Apteka
+namespace Apteka.View.MedicineV
 {
 	public partial class MedicinesForm : FormWithNotification
 	{

@@ -1,4 +1,5 @@
 ﻿using Apteka.Model;
+using Apteka.View.MedicineV;
 using Apteka.ViewModel;
 using Apteka.ViewModel.MedicineVM;
 using Apteka.ViewModel.ProductsLogisticVM;

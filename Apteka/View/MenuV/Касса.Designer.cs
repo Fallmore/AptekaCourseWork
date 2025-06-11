@@ -1,4 +1,4 @@
-﻿namespace Apteka
+﻿namespace Apteka.View.MenuV
 {
     partial class Касса
     {

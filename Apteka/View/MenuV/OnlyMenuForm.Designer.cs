@@ -41,13 +41,14 @@
 			действующиеСотрудникиToolStripMenuItem = new ToolStripMenuItem();
 			уволенныеСотрудникиToolStripMenuItem = new ToolStripMenuItem();
 			назначенияСотрудниковToolStripMenuItem = new ToolStripMenuItem();
+			управляющиеОтделамиToolStripMenuItem = new ToolStripMenuItem();
 			toolStripSeparator2 = new ToolStripSeparator();
 			добавитьСотрудникаToolStripMenuItem = new ToolStripMenuItem();
 			отчетыToolStripMenuItem = new ToolStripMenuItem();
 			запросыНаЛекарственныеПрепаратыToolStripMenuItem = new ToolStripMenuItem();
 			наличиеЛекарственныхПрепаратовВКонцеДняToolStripMenuItem = new ToolStripMenuItem();
 			справкаToolStripMenuItem = new ToolStripMenuItem();
-			управляющиеОтделамиToolStripMenuItem = new ToolStripMenuItem();
+			добавитьНакладныеToolStripMenuItem = new ToolStripMenuItem();
 			menuStrip1.SuspendLayout();
 			SuspendLayout();
 			// 
@@ -63,7 +64,7 @@
 			// 
 			// лекарстваToolStripMenuItem
 			// 
-			лекарстваToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { лекарстваToolStripMenuItem1, препаратыToolStripMenuItem, списанныеПрепаратыToolStripMenuItem, наСкладеToolStripMenuItem, toolStripSeparator1, историяПродажToolStripMenuItem, накладныеToolStripMenuItem });
+			лекарстваToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { лекарстваToolStripMenuItem1, препаратыToolStripMenuItem, списанныеПрепаратыToolStripMenuItem, наСкладеToolStripMenuItem, toolStripSeparator1, историяПродажToolStripMenuItem, накладныеToolStripMenuItem, добавитьНакладныеToolStripMenuItem });
 			лекарстваToolStripMenuItem.Name = "лекарстваToolStripMenuItem";
 			лекарстваToolStripMenuItem.Size = new Size(114, 29);
 			лекарстваToolStripMenuItem.Text = "Лекарства";
@@ -143,6 +144,13 @@
 			назначенияСотрудниковToolStripMenuItem.Text = "Назначения сотрудников...";
 			назначенияСотрудниковToolStripMenuItem.Click += назначенияСотрудниковToolStripMenuItem_Click;
 			// 
+			// управляющиеОтделамиToolStripMenuItem
+			// 
+			управляющиеОтделамиToolStripMenuItem.Name = "управляющиеОтделамиToolStripMenuItem";
+			управляющиеОтделамиToolStripMenuItem.Size = new Size(323, 30);
+			управляющиеОтделамиToolStripMenuItem.Text = "Управляющие отделами...";
+			управляющиеОтделамиToolStripMenuItem.Click += управляющиеОтделамиToolStripMenuItem_Click;
+			// 
 			// toolStripSeparator2
 			// 
 			toolStripSeparator2.Name = "toolStripSeparator2";
@@ -183,12 +191,12 @@
 			справкаToolStripMenuItem.Text = "Справка";
 			справкаToolStripMenuItem.Click += справкаToolStripMenuItem_Click;
 			// 
-			// управляющиеОтделамиToolStripMenuItem
+			// добавитьНакладныеToolStripMenuItem
 			// 
-			управляющиеОтделамиToolStripMenuItem.Name = "управляющиеОтделамиToolStripMenuItem";
-			управляющиеОтделамиToolStripMenuItem.Size = new Size(323, 30);
-			управляющиеОтделамиToolStripMenuItem.Text = "Управляющие отделами";
-			управляющиеОтделамиToolStripMenuItem.Click += управляющиеОтделамиToolStripMenuItem_Click;
+			добавитьНакладныеToolStripMenuItem.Name = "добавитьНакладныеToolStripMenuItem";
+			добавитьНакладныеToolStripMenuItem.Size = new Size(294, 30);
+			добавитьНакладныеToolStripMenuItem.Text = "Добавить накладные...";
+			добавитьНакладныеToolStripMenuItem.Click += добавитьНакладныеToolStripMenuItem_Click;
 			// 
 			// OnlyMenuForm
 			// 
@@ -229,5 +237,6 @@
 		private ToolStripMenuItem наличиеЛекарственныхПрепаратовВКонцеДняToolStripMenuItem;
 		private ToolStripMenuItem наСкладеToolStripMenuItem;
 		private ToolStripMenuItem управляющиеОтделамиToolStripMenuItem;
+		private ToolStripMenuItem добавитьНакладныеToolStripMenuItem;
 	}
 }

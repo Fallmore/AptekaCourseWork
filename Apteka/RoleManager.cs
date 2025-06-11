@@ -1,13 +1,5 @@
 ﻿namespace Apteka
 {
-	internal static class RoleManager
-	{
-		internal static bool IsRoleCorrect(Roles havingRole, Roles[] neededRoles)
-		{
-			return neededRoles.Contains(havingRole);
-		}
-	}
-
 	internal enum Roles
 	{
 		Сотрудник = 1,

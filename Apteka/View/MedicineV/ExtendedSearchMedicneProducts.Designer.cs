@@ -1,4 +1,4 @@
-﻿namespace Apteka.View
+﻿namespace Apteka.View.MedicineV
 {
 	partial class ExtendedSearchMedicneProducts
 	{

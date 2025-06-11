@@ -53,7 +53,7 @@
 			tbLogin.Name = "tbLogin";
 			tbLogin.Size = new Size(131, 29);
 			tbLogin.TabIndex = 1;
-			tbLogin.Text = "Petrova";
+			tbLogin.Text = "Директор";
 			tbLogin.KeyDown += RegistrationForm_KeyDown;
 			// 
 			// tbPassword
@@ -64,7 +64,7 @@
 			tbPassword.Name = "tbPassword";
 			tbPassword.Size = new Size(131, 29);
 			tbPassword.TabIndex = 3;
-			tbPassword.Text = "Petrova123";
+			tbPassword.Text = "Директор123";
 			tbPassword.UseSystemPasswordChar = true;
 			tbPassword.KeyDown += RegistrationForm_KeyDown;
 			// 
