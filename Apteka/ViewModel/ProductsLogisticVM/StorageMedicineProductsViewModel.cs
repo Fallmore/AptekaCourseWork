@@ -80,20 +80,8 @@ namespace Apteka.ViewModel.ProductsLogisticVM
 
 		internal bool InsertStorageMedicineProduct(List<StorageMedicineProduct> lsmp)
 		{
-			try
-			{
-				General.AptekaContext.StorageMedicineProducts.AddRange(lsmp);
-				General.AptekaContext.SaveChanges();
-				return true;
-			}
-			catch (PostgresException ex)
-			{
-				string message = ex.Message;
-
-				MessageBox.Show(message, "Ошибка данных",
-						MessageBoxButtons.OK, MessageBoxIcon.Error);
-				return false;
-			}
+			General.AptekaContext.StorageMedicineProducts.AddRange(lsmp);
+			return true;
 		}
 
 		internal List<StoragePharmacy> GetStoragePharmacy(int? idStorage = null)

@@ -18,6 +18,7 @@ namespace Apteka.View
 		public HistorySalesForm()
 		{
 			InitializeComponent();
+			TopMost = true;
 			_viewModel = new();
 			_viewModel.ConfigureSettingsDGV<HistorySaleWrapper>(dgvHistorySales);
 			_viewModel.SetDefaultDataSource<HistorySaleWrapper>(dgvHistorySales);
@@ -38,8 +39,8 @@ namespace Apteka.View
 			_viewModel.General.DatabaseNotificationService.Subscribe<HistorySalesForm>("history_sale",
 				data =>
 				{
-					RefreshData<HistorySale>(_viewModel.General.HistorySales,
-					value => _viewModel.General.HistorySales = value, data,
+					RefreshData<HistorySale>([],
+					value => { }, data,
 					() => _viewModel.SetDefaultDataSource<HistorySaleWrapper>(dgvHistorySales));
 
 				});
@@ -47,8 +48,8 @@ namespace Apteka.View
 			_viewModel.General.DatabaseNotificationService.Subscribe<HistorySalesForm>("history_sale_medicine_product",
 				data =>
 				{
-					RefreshData<HistorySaleMedicineProduct>(_viewModel.General.HistorySalesMedicineProduct,
-					value => _viewModel.General.HistorySalesMedicineProduct = value, data,
+					RefreshData<HistorySaleMedicineProduct>([],
+					value => { }, data,
 					() => _viewModel.SetDefaultDataSource<HistorySaleMedicineProductWrapper>(dgvHistorySaleMedicineProduct));
 
 				});
@@ -67,7 +68,7 @@ namespace Apteka.View
 				data =>
 				{
 					RefreshDataSimple<StoragePlace>(
-					value => _viewModel.General.StoragePlaces = value, _viewModel.General);
+					value => { }, _viewModel.General);
 
 				});
 
@@ -75,7 +76,7 @@ namespace Apteka.View
 				data =>
 				{
 					RefreshDataSimple<StoragePharmacy>(
-					value => _viewModel.General.StoragePharmacies = value, _viewModel.General);
+					value => { }, _viewModel.General);
 
 				});
 
@@ -83,7 +84,7 @@ namespace Apteka.View
 				data =>
 				{
 					RefreshDataSimple<Department>(
-					value => _viewModel.General.Departments = value, _viewModel.General);
+					value => { }, _viewModel.General);
 
 				});
 		}

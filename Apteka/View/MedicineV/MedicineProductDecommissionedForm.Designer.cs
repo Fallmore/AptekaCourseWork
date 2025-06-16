@@ -239,7 +239,6 @@
 
 		private SplitContainer splitContainer1;
 		private DataGridView dgvMedicineProductDecommissioned;
-		private Label label1;
 		private Button btnSearch;
 		private Button btnResetSearch;
 		private ContextMenuStrip contextMenuStrip1;

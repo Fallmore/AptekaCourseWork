@@ -31,7 +31,7 @@ namespace Apteka.View.ProductsLogisticV
 		private void InitializeComponent()
 		{
 			components = new System.ComponentModel.Container();
-			DataGridViewCellStyle dataGridViewCellStyle2 = new DataGridViewCellStyle();
+			DataGridViewCellStyle dataGridViewCellStyle1 = new DataGridViewCellStyle();
 			splitContainer1 = new SplitContainer();
 			splitContainer2 = new SplitContainer();
 			label1 = new Label();
@@ -211,18 +211,19 @@ namespace Apteka.View.ProductsLogisticV
 			dgvStorage.Location = new Point(0, 0);
 			dgvStorage.MultiSelect = false;
 			dgvStorage.Name = "dgvStorage";
-			dataGridViewCellStyle2.Alignment = DataGridViewContentAlignment.MiddleLeft;
-			dataGridViewCellStyle2.BackColor = SystemColors.Control;
-			dataGridViewCellStyle2.ForeColor = SystemColors.WindowText;
-			dataGridViewCellStyle2.SelectionBackColor = SystemColors.Highlight;
-			dataGridViewCellStyle2.SelectionForeColor = SystemColors.HighlightText;
-			dataGridViewCellStyle2.WrapMode = DataGridViewTriState.True;
-			dgvStorage.RowHeadersDefaultCellStyle = dataGridViewCellStyle2;
+			dataGridViewCellStyle1.Alignment = DataGridViewContentAlignment.MiddleLeft;
+			dataGridViewCellStyle1.BackColor = SystemColors.Control;
+			dataGridViewCellStyle1.ForeColor = SystemColors.WindowText;
+			dataGridViewCellStyle1.SelectionBackColor = SystemColors.Highlight;
+			dataGridViewCellStyle1.SelectionForeColor = SystemColors.HighlightText;
+			dataGridViewCellStyle1.WrapMode = DataGridViewTriState.True;
+			dgvStorage.RowHeadersDefaultCellStyle = dataGridViewCellStyle1;
 			dgvStorage.Size = new Size(576, 255);
 			dgvStorage.TabIndex = 6;
 			dgvStorage.CellBeginEdit += dgvStorage_CellBeginEdit;
 			dgvStorage.CellEndEdit += dgv_CellEndEdit;
 			dgvStorage.CellMouseDown += dgv_CellMouseDown;
+			dgvStorage.DefaultValuesNeeded += dgvStorage_DefaultValuesNeeded;
 			dgvStorage.EditingControlShowing += dgv_EditingControlShowing;
 			// 
 			// Storage

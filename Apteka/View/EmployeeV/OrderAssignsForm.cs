@@ -16,6 +16,7 @@ namespace Apteka.View.EmployeeV
 		public OrderAssignsForm()
 		{
 			InitializeComponent();
+			TopMost = true;
 			_viewModel = new();
 			_viewModel.ConfigureSettingsDGV(dgvOrderAssigns);
 			_viewModel.SetDefaultDataSource(dgvOrderAssigns);
@@ -33,8 +34,8 @@ namespace Apteka.View.EmployeeV
 			_viewModel.General.DatabaseNotificationService.Subscribe<OrderAssignsForm>("order_assign",
 				data =>
 				{
-					RefreshData<OrderAssign>(_viewModel.General.OrderAssigns,
-					value => _viewModel.General.OrderAssigns = value, data,
+					RefreshData<OrderAssign>([],
+					value => { }, data,
 					() => _viewModel.SetDefaultDataSource(dgvOrderAssigns));
 
 				});
@@ -53,7 +54,7 @@ namespace Apteka.View.EmployeeV
 				data =>
 				{
 					RefreshDataSimple<Post>(
-					value => _viewModel.General.Posts = value, _viewModel.General);
+					value => { }, _viewModel.General);
 
 				});
 
@@ -61,7 +62,7 @@ namespace Apteka.View.EmployeeV
 				data =>
 				{
 					RefreshDataSimple<Department>(
-					value => _viewModel.General.Departments = value, _viewModel.General);
+					value => { }, _viewModel.General);
 
 				});
 		}

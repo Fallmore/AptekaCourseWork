@@ -5,6 +5,7 @@
 		public ReportMedicineProductAmountForm()
 		{
 			InitializeComponent();
+			TopMost = true;
 		}
 	}
 }

@@ -1,10 +1,12 @@
 ﻿using Apteka.Model;
+using Apteka.Properties;
 using Apteka.ViewModel;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Serialization;
 using System.ComponentModel;
+using System.Reflection;
 
 namespace Apteka.BaseClasses
 {
@@ -25,9 +27,10 @@ namespace Apteka.BaseClasses
 		internal void RefreshData<T>(List<T> collection, Action<List<T>> setter, JObject data,
 			Action? dgvUpdate = null) where T : UnionId
 		{
+			Thread.Sleep(1000);
 			try
 			{
-				string operation = data["operation"].ToString();
+				string operation = data["operation"]?.ToString() ?? "";
 
 				switch (operation)
 				{
@@ -59,16 +62,20 @@ namespace Apteka.BaseClasses
 
 		private void Insert<T>(List<T> collection, Action<List<T>> setter, JToken payload) where T : UnionId
 		{
-			T? newItem = HandleJsonbFields<T>(payload["new"] as JObject);
-			collection.Add(newItem);
-			setter(collection);
+			T? newItem = HandleJsonbFields<T>((payload["new"] as JObject) ?? []);
+			T? existing = collection.FirstOrDefault(x => x.GetId().Equals(newItem.GetId()));
+			if (existing == null)
+			{
+				collection.Add(newItem);
+				setter(collection);
+			}
 		}
 
 		private void Update<T>(List<T> collection, Action<List<T>> setter, JToken payload) where T : UnionId
 		{
-			T? oldItem = HandleJsonbFields<T>(payload["old"] as JObject);
+			T? oldItem = HandleJsonbFields<T>((payload["old"] as JObject) ?? []);
 			T? existing = collection.FirstOrDefault(x => x.GetId().Equals(oldItem.GetId()));
-			T? updatedItem = HandleJsonbFields<T>(payload["new"] as JObject);
+			T? updatedItem = HandleJsonbFields<T>((payload["new"] as JObject) ?? []);
 
 			if (existing != null)
 			{
@@ -80,7 +87,7 @@ namespace Apteka.BaseClasses
 
 		private void Delete<T>(List<T> collection, Action<List<T>> setter, JToken payload) where T : UnionId
 		{
-			T? dItem = HandleJsonbFields<T>(payload["old"] as JObject);
+			T? dItem = HandleJsonbFields<T>((payload["old"] as JObject) ?? []);
 			T? deletedItem = collection.FirstOrDefault(x => x.GetId().Equals(dItem.GetId()));
 
 			if (deletedItem != null)

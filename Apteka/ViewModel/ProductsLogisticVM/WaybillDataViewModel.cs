@@ -1,4 +1,5 @@
 ﻿using Apteka.Model;
+using Microsoft.EntityFrameworkCore;
 using Npgsql;
 
 namespace Apteka.ViewModel.ProductsLogisticVM
@@ -26,42 +27,14 @@ namespace Apteka.ViewModel.ProductsLogisticVM
 
 		internal bool InsertWaybill(Waybill w)
 		{
-			try
-			{
-				General.AptekaContext.Waybills.Add(w);
-				General.AptekaContext.SaveChanges();
-				return true;
-			}
-			catch (PostgresException ex)
-			{
-				string message = ex.Message;
-
-				string constraintName = ex.ConstraintName ?? "";
-				if (constraintName.Contains("wrong_date_waybill"))
-					message = "Ошибка! Дата накладной не должна быть позже сегодняшней даты!";
-
-				MessageBox.Show(message, "Ошибка данных",
-						MessageBoxButtons.OK, MessageBoxIcon.Error);
-				return false;
-			}
+			General.AptekaContext.Waybills.Add(w);
+			return true;
 		}
 
 		internal bool InsertWaybillMedicineProduct(List<WaybillMedicineProduct> lwmp)
 		{
-			try
-			{
-				General.AptekaContext.WaybillMedicineProducts.AddRange(lwmp);
-				General.AptekaContext.SaveChanges();
-				return true;
-			}
-			catch (PostgresException ex)
-			{
-				string message = ex.Message;
-
-				MessageBox.Show(message, "Ошибка данных",
-						MessageBoxButtons.OK, MessageBoxIcon.Error);
-				return false;
-			}
+			General.AptekaContext.WaybillMedicineProducts.AddRange(lwmp);
+			return true;
 		}
 
 		internal List<WaybillMedicineProduct> GetMeasure(Guid? idMedicineProduct = null)

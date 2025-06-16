@@ -37,6 +37,7 @@
 			toolStripSeparator1 = new ToolStripSeparator();
 			историяПродажToolStripMenuItem = new ToolStripMenuItem();
 			накладныеToolStripMenuItem = new ToolStripMenuItem();
+			добавитьНакладныеToolStripMenuItem = new ToolStripMenuItem();
 			сотрудникиToolStripMenuItem = new ToolStripMenuItem();
 			действующиеСотрудникиToolStripMenuItem = new ToolStripMenuItem();
 			уволенныеСотрудникиToolStripMenuItem = new ToolStripMenuItem();
@@ -48,7 +49,6 @@
 			запросыНаЛекарственныеПрепаратыToolStripMenuItem = new ToolStripMenuItem();
 			наличиеЛекарственныхПрепаратовВКонцеДняToolStripMenuItem = new ToolStripMenuItem();
 			справкаToolStripMenuItem = new ToolStripMenuItem();
-			добавитьНакладныеToolStripMenuItem = new ToolStripMenuItem();
 			menuStrip1.SuspendLayout();
 			SuspendLayout();
 			// 
@@ -115,6 +115,13 @@
 			накладныеToolStripMenuItem.Size = new Size(294, 30);
 			накладныеToolStripMenuItem.Text = "Накладные...";
 			накладныеToolStripMenuItem.Click += накладныеToolStripMenuItem_Click;
+			// 
+			// добавитьНакладныеToolStripMenuItem
+			// 
+			добавитьНакладныеToolStripMenuItem.Name = "добавитьНакладныеToolStripMenuItem";
+			добавитьНакладныеToolStripMenuItem.Size = new Size(294, 30);
+			добавитьНакладныеToolStripMenuItem.Text = "Добавить накладные...";
+			добавитьНакладныеToolStripMenuItem.Click += добавитьНакладныеToolStripMenuItem_Click;
 			// 
 			// сотрудникиToolStripMenuItem
 			// 
@@ -191,13 +198,6 @@
 			справкаToolStripMenuItem.Text = "Справка";
 			справкаToolStripMenuItem.Click += справкаToolStripMenuItem_Click;
 			// 
-			// добавитьНакладныеToolStripMenuItem
-			// 
-			добавитьНакладныеToolStripMenuItem.Name = "добавитьНакладныеToolStripMenuItem";
-			добавитьНакладныеToolStripMenuItem.Size = new Size(294, 30);
-			добавитьНакладныеToolStripMenuItem.Text = "Добавить накладные...";
-			добавитьНакладныеToolStripMenuItem.Click += добавитьНакладныеToolStripMenuItem_Click;
-			// 
 			// OnlyMenuForm
 			// 
 			AutoScaleDimensions = new SizeF(7F, 15F);
@@ -209,6 +209,8 @@
 			MaximizeBox = false;
 			Name = "OnlyMenuForm";
 			Text = "ИНФОРМАЦИОННАЯ СИСТЕМА \"АПТЕКА\"";
+			WindowState = FormWindowState.Maximized;
+			SizeChanged += Form_SizeChanged;
 			menuStrip1.ResumeLayout(false);
 			menuStrip1.PerformLayout();
 			ResumeLayout(false);

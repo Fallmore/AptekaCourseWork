@@ -98,6 +98,7 @@ public class MedicineProductWrapper(MedicineProduct mp)
 		mp.Components
 		.Replace("\"Мера\":", "")
 		.Replace(", \"Вещество\":", " ")
+		.Replace(",\"Вещество\":", " ")
 		.Replace("\"", "")
 		.Replace(",", ";")
 		.Replace("}", "")

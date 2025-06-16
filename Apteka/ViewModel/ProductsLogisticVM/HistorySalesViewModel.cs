@@ -2,6 +2,8 @@
 using Apteka.ViewModel.EmployeeVM;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking.Internal;
+using Npgsql;
+using NpgsqlTypes;
 
 namespace Apteka.ViewModel.ProductsLogisticVM
 {
@@ -75,15 +77,13 @@ namespace Apteka.ViewModel.ProductsLogisticVM
 		{
 			try
 			{
-				// Преобразуем даты в UTC
-				dtParams[0] = DateTime.SpecifyKind(dtParams[0], DateTimeKind.Utc);
-				dtParams[1] = DateTime.SpecifyKind(dtParams[1], DateTimeKind.Utc);
-
 				List<HistorySale> results = await _general.AptekaContext.HistorySales
 					.FromSqlRaw("SELECT * FROM search_sale({0}, {1}, {2}, {3}, {4}," +
-					"{5}::timestamp, {6}::timestamp, {7});", intParams[0], intParams[1], intParams[2],
+					"{5}, {6}, {7});", intParams[0], intParams[1], intParams[2],
 						guidParams[0] == new Guid() ? null : guidParams[0],
-						"", dtParams[0], dtParams[1],
+						"",
+						new NpgsqlParameter("p5", NpgsqlDbType.Timestamp) { Value = dtParams[0] },
+						new NpgsqlParameter("p6", NpgsqlDbType.Timestamp) { Value = dtParams[1] },
 						guidParams[1] == new Guid() ? null : guidParams[1])
 					.AsNoTracking()
 					.ToListAsync();

@@ -3,14 +3,13 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Npgsql;
 using System.Collections.Concurrent;
-using System.Diagnostics;
 
 namespace Apteka.Properties
 {
 	internal class DatabaseNotificationService : IDisposable
 	{
 		private readonly NpgsqlConnection _connection;
-		private readonly ConcurrentDictionary<string, ConcurrentBag<Action<JObject>>> _subscribers = new();
+		private readonly Dictionary<string, Action<JObject>> _handlers = [];
 		private CancellationTokenSource _cts;
 		private Task _listenerTask;
 
@@ -45,9 +44,8 @@ namespace Apteka.Properties
 					{
 						continue;
 					}
-					catch (Exception ex)
+					catch (Exception)
 					{
-						Debug.WriteLine($"Ошибка слушания: {ex.Message}");
 						await Task.Delay(1000);
 					}
 				}
@@ -74,33 +72,17 @@ namespace Apteka.Properties
 			{
 				var channel = $"{tableName}_updates";
 
-				_subscribers.AddOrUpdate(channel,
-			_ =>
-						{
-							if (_listenerTask != null) StopListening();
+				if (_listenerTask != null) StopListening();
 
-							// Если канала нет - создаем новую подписку в БД
-							using var cmd = new NpgsqlCommand($"LISTEN {channel}", _connection);
-							cmd.ExecuteNonQuery();
+				using var cmd = new NpgsqlCommand($"LISTEN {channel}", _connection);
+				cmd.ExecuteNonQuery();
 
-							StartListening();
+				StartListening();
 
-							var bag = new ConcurrentBag<Action<JObject>>
-							{
-								handler
-							};
-							return bag;
-						},
-			(_, existingBag) =>
-						{
-							// Если канал есть - просто добавляем обработчик
-							existingBag.Add(handler);
-							return existingBag;
-						});
+				_handlers[typeof(T).Name + ":" + channel] = handler;
 			}
-			catch (NpgsqlException ex)
+			catch (NpgsqlException)
 			{
-				Debug.WriteLine($"Ошибка подписи: {ex.Message}");
 				if (_connection.State == System.Data.ConnectionState.Closed)
 					_connection.Open();
 				Subscribe<T>(tableName, handler);
@@ -116,20 +98,21 @@ namespace Apteka.Properties
 
 		private void _connection_Notification(object sender, NpgsqlNotificationEventArgs e)
 		{
-			if (_subscribers.TryGetValue(e.Channel, out var handlers))
+			foreach (string key in _handlers.Keys)
 			{
-				var data = JsonConvert.DeserializeObject<dynamic>(e.Payload);
-				foreach (var handler in handlers)
-				{
-					try
+				if (key.Contains(":" + e.Channel))
+					if (_handlers.TryGetValue(key, out var handler))
 					{
-						handler(data);
+						try
+						{
+							var data = JsonConvert.DeserializeObject<dynamic>(e.Payload);
+							handler(data);
+						}
+						catch (Exception ex)
+						{
+							Console.WriteLine($"Ошибка в обработчике уведомлений: {ex.Message}");
+						}
 					}
-					catch (Exception ex)
-					{
-						Console.WriteLine($"Ошибка в обработчике: {ex.Message}");
-					}
-				}
 			}
 		}
 	}

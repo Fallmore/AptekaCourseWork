@@ -658,9 +658,8 @@ public partial class AptekaContext : DbContext
 
 		modelBuilder.Entity<WaybillMedicineProduct>(entity =>
 		{
-			entity
-				.HasNoKey()
-				.ToTable("waybill_medicine_product");
+			entity.HasKey(e => new { e.IdWaybill, e.IdMedicineProduct});
+			entity.ToTable("waybill_medicine_product");
 
 			entity.Property(e => e.Amount).HasColumnName("amount");
 			entity.Property(e => e.Cost).HasColumnName("cost");

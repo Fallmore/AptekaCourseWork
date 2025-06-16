@@ -14,6 +14,7 @@ namespace Apteka.View.MedicineV
 		public MedicinesForm()
 		{
 			InitializeComponent();
+			TopMost = true;
 			_viewModel = new();
 			_viewModel.ConfigureSettingsDGV(dgvMedicine);
 			_viewModel.SetDefaultDataSource(dgvMedicine);
@@ -27,8 +28,8 @@ namespace Apteka.View.MedicineV
 			_viewModel.General.DatabaseNotificationService.Subscribe<MedicinesForm>("medicine",
 				data =>
 				{
-					RefreshData<Medicine>(_viewModel.General.Medicines,
-					value => _viewModel.General.Medicines = value, data);
+					RefreshData<Medicine>([],
+					value => { }, data);
 				});
 		}
 

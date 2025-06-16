@@ -6,6 +6,7 @@ namespace Apteka.View.SimpleV
 		public AboutForm()
 		{
 			InitializeComponent();
+			TopMost = true;
 		}
 	}
 }

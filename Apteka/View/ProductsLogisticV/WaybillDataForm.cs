@@ -1,8 +1,10 @@
 ﻿using Apteka.Model;
 using Apteka.View.MedicineV;
 using Apteka.ViewModel;
+using Apteka.ViewModel.EmployeeVM;
 using Apteka.ViewModel.MedicineVM;
 using Apteka.ViewModel.ProductsLogisticVM;
+using Microsoft.EntityFrameworkCore;
 using System.ComponentModel;
 using System.Data;
 
@@ -24,8 +26,10 @@ namespace Apteka.View.ProductsLogisticV
 		public WaybillDataForm()
 		{
 			InitializeComponent();
+			TopMost = true;
 			_viewModel = new();
 			_viewModelMP = new();
+			_viewModelSMP = new();
 			dtpDateWaybill.Value =
 				dtpDateWaybill.MaxDate = DateTime.Now;
 			SetCmsMedicineProductCostItems();
@@ -350,6 +354,9 @@ namespace Apteka.View.ProductsLogisticV
 					break;
 			}
 
+			if (tbNumberWaybill.Text.Trim() == "")
+				message = "Ошибка! Вы не ввели номер накладной!";
+
 			if (message != "")
 			{
 				MessageBox.Show(message, "Заполнение накладной",
@@ -362,76 +369,86 @@ namespace Apteka.View.ProductsLogisticV
 
 		private void btnDone_Click(object sender, EventArgs e)
 		{
-			//Проверь WaybillMedicineProducts на изменения с таблицы
-			if (!CheckAllData())
+			try
 			{
-				DialogResult = DialogResult.None;
-				return;
-			}
-
-			Waybill w = new()
-			{
-				IdWaybill = int.Parse(tbNumberWaybill.Text),
-				IdSupplier = int.Parse(cbSupplier.SelectedValue?.ToString() ?? ""),
-				DateWaybill = DateOnly.FromDateTime(dtpDateWaybill.Value)
-			};
-
-			if (!_viewModel.InsertWaybill(w))
-			{
-				DialogResult = DialogResult.None;
-				return;
-			}
-
-			List<WaybillMedicineProduct> lwmp = [];
-			foreach (var item in WaybillMedicineProducts)
-			{
-				WaybillMedicineProduct wmp = new()
+				if (!CheckAllData())
 				{
-					IdWaybill = w.IdWaybill,
-					IdMedicineProduct = item.IdMedicineProduct,
-					Amount = item.Amount,
-					Cost = item.Cost,
-					Measure = item.Measure
-				};
-				lwmp.Add(wmp);
-			}
-
-			if (!_viewModel.InsertWaybillMedicineProduct(lwmp))
-			{
-				DialogResult = DialogResult.None;
-				return;
-			}
-
-			List<StorageMedicineProduct> lsmp = [];
-			for (int i = 2; i < dgvStorage.Columns.Count; i++)
-			{
-				for (int j = 0; j < dgvStorage.Rows.Count; j++)
-				{
-					DataGridViewRow row = dgvStorage.Rows[j];
-					if (row.IsNewRow) continue;
-
-					DataGridViewComboBoxCell cbStorage = row.Cells[0] as DataGridViewComboBoxCell ?? new();
-					DataGridViewComboBoxCell cbPlace = row.Cells[1] as DataGridViewComboBoxCell ?? new();
-
-					Guid id = Guid.Parse(dgvStorage.Columns[i].Name);
-					float amount = float.Parse(dgvStorage.Rows[j].Cells[i].Value?.ToString() ?? "");
-					if (amount == 0) continue;
-
-					StorageMedicineProduct smp = new()
-					{
-						IdMedicineProduct = id,
-						IdStorage = int.Parse(cbStorage.Value?.ToString() ?? ""),
-						IdPlace = int.Parse(cbPlace.Value?.ToString() ?? ""),
-						Amount = amount,
-						Measure = _viewModel.GetMeasure(id)
-							.Select(wmp => wmp.Measure).First()
-					};
-					lsmp.Add(smp);
+					DialogResult = DialogResult.None;
+					return;
 				}
-			}
 
-			if (!_viewModelSMP.InsertStorageMedicineProduct(lsmp))
+				Waybill w = new()
+				{
+					IdWaybill = int.Parse(tbNumberWaybill.Text),
+					IdSupplier = int.Parse(cbSupplier.SelectedValue?.ToString() ?? ""),
+					DateWaybill = DateOnly.FromDateTime(dtpDateWaybill.Value),
+					IdDepartment = EmployeeAccountViewModel.GetCurrentDepartment()
+				};
+
+				_viewModel.InsertWaybill(w);
+				_viewModel.General.AptekaContext.SaveChanges();
+
+				List<WaybillMedicineProduct> lwmp = [];
+				foreach (WaybillMedicineProductWrapper item in WaybillMedicineProducts)
+				{
+					WaybillMedicineProduct wmp = new()
+					{
+						IdWaybill = w.IdWaybill,
+						IdMedicineProduct = item.IdMedicineProduct,
+						Amount = item.Amount,
+						Cost = item.Cost,
+						Measure = item.Measure
+					};
+					lwmp.Add(wmp);
+				}
+
+				_viewModel.InsertWaybillMedicineProduct(lwmp);
+				_viewModel.General.AptekaContext.SaveChanges();
+
+				List<StorageMedicineProduct> lsmp = [];
+				for (int i = 2; i < dgvStorage.Columns.Count; i++)
+				{
+					for (int j = 0; j < dgvStorage.Rows.Count; j++)
+					{
+						DataGridViewRow row = dgvStorage.Rows[j];
+						if (row.IsNewRow) continue;
+
+						DataGridViewComboBoxCell cbStorage = row.Cells[0] as DataGridViewComboBoxCell ?? new();
+						DataGridViewComboBoxCell cbPlace = row.Cells[1] as DataGridViewComboBoxCell ?? new();
+
+						Guid id = Guid.Parse(dgvStorage.Columns[i].Name);
+						float amount = float.Parse(dgvStorage.Rows[j].Cells[i].Value?.ToString() ?? "");
+						if (amount == 0) continue;
+
+						StorageMedicineProduct smp = new()
+						{
+							IdMedicineProduct = id,
+							IdStorage = int.Parse(cbStorage.Value?.ToString() ?? ""),
+							IdPlace = int.Parse(cbPlace.Value?.ToString() ?? ""),
+							Amount = amount,
+							Measure = _viewModel.GetMeasure(id)
+								.Select(wmp => wmp.Measure).First(),
+							IdDepartment = EmployeeAccountViewModel.GetCurrentDepartment()
+						};
+						lsmp.Add(smp);
+					}
+				}
+
+				_viewModelSMP.InsertStorageMedicineProduct(lsmp);
+				_viewModel.General.AptekaContext.SaveChanges();
+				MessageBox.Show("Накладная успешно добавлена", "Добавление накладной",
+										MessageBoxButtons.OK, MessageBoxIcon.Information);
+				Close();
+			}
+			catch (DbUpdateException ex)
 			{
+				string message = ex.InnerException?.Message ?? "";
+
+				if (message.Contains("wrong_date_waybill"))
+					message = "Ошибка! Дата накладной не должна быть позже сегодняшней даты!";
+
+				MessageBox.Show(message, "Ошибка данных",
+						MessageBoxButtons.OK, MessageBoxIcon.Error);
 				DialogResult = DialogResult.None;
 				return;
 			}
@@ -514,7 +531,7 @@ namespace Apteka.View.ProductsLogisticV
 
 				if (isTargetCell)
 				{
-					TextBox tb = e.Control as TextBox;
+					TextBox tb = (e.Control as TextBox) ?? new();
 					if (tb != null)
 					{
 						tb.KeyPress += new KeyPressEventHandler(tbFloat_KeyPress);
@@ -555,6 +572,15 @@ namespace Apteka.View.ProductsLogisticV
 		private void dgvStorage_CellBeginEdit(object sender, DataGridViewCellCancelEventArgs e)
 		{
 			_oldCellValue = dgvStorage.Rows[e.RowIndex].Cells[e.ColumnIndex].Value?.ToString() ?? "";
+		}
+
+		private void dgvStorage_DefaultValuesNeeded(object sender, DataGridViewRowEventArgs e)
+		{
+			for (int i = 2; i < e.Row.Cells.Count; i++)
+			{
+				e.Row.Cells[i].Value = 0;
+			}
+
 		}
 	}
 }

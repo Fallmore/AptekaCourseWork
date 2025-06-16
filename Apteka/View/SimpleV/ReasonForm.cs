@@ -5,6 +5,7 @@
 		public ReasonForm()
 		{
 			InitializeComponent();
+			TopMost = true;
 		}
 	}
 }

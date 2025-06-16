@@ -5,6 +5,7 @@
 		public AmountForm()
 		{
 			InitializeComponent();
+			TopMost = true;
 		}
 
 		private void tbAmount_KeyPress(object sender, KeyPressEventArgs e)

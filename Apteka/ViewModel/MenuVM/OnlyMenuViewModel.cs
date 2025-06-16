@@ -1,5 +1,7 @@
 ﻿using Apteka.Model;
 using Microsoft.EntityFrameworkCore;
+using Npgsql;
+using NpgsqlTypes;
 
 namespace Apteka.ViewModel.MenuVM
 {
@@ -42,16 +44,14 @@ namespace Apteka.ViewModel.MenuVM
 			return amountsMP;
 		}
 
-		internal List<MedicineProductSales> GetReportMedicineProductSales(Guid idMP, int idDepartment, DateTime[] dt)
+		internal List<MedicineProductSales> GetReportMedicineProductSales(Guid idMP, int idDepartment, DateTime[] dtParams)
 		{
-			// Преобразуем даты в UTC
-			dt[0] = DateTime.SpecifyKind(dt[0], DateTimeKind.Utc);
-			dt[1] = DateTime.SpecifyKind(dt[1], DateTimeKind.Utc);
-
 			List<MedicineProductSales> salesMP = General.AptekaContext.Database
 				.SqlQueryRaw<MedicineProductSales>("SELECT * FROM get_medicine_product_sales({0}, {1}, " +
-				"{2}::timestamp, {3}::timestamp)",
-				idMP, idDepartment, dt[0], dt[1])
+				"{2}, {3})",
+				idMP, idDepartment,
+						new NpgsqlParameter("p2", NpgsqlDbType.Timestamp) { Value = dtParams[0] },
+						new NpgsqlParameter("p3", NpgsqlDbType.Timestamp) { Value = dtParams[1] })
 				.ToList();
 			return salesMP;
 		}

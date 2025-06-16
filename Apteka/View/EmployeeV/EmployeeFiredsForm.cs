@@ -16,6 +16,7 @@ namespace Apteka.View.EmployeeV
 		public EmployeeFiredsForm()
 		{
 			InitializeComponent();
+			TopMost = true;
 			_viewModel = new();
 			_viewModel.ConfigureSettingsDGV(dgvEmployeeFireds);
 			_viewModel.SetDefaultDataSource(dgvEmployeeFireds);
@@ -33,8 +34,8 @@ namespace Apteka.View.EmployeeV
 			_viewModel.General.DatabaseNotificationService.Subscribe<EmployeeFiredsForm>("employee_fired",
 				data =>
 				{
-					RefreshData<EmployeeFired>(_viewModel.General.EmployeeFireds,
-					value => _viewModel.General.EmployeeFireds = value, data,
+					RefreshData<EmployeeFired>([],
+					value => { }, data,
 					() => _viewModel.SetDefaultDataSource(dgvEmployeeFireds));
 				});
 		}
@@ -52,7 +53,7 @@ namespace Apteka.View.EmployeeV
 				data =>
 				{
 					RefreshDataSimple<Post>(
-					value => _viewModel.General.Posts = value, _viewModel.General);
+					value => { }, _viewModel.General);
 
 				});
 
@@ -60,7 +61,7 @@ namespace Apteka.View.EmployeeV
 				data =>
 				{
 					RefreshDataSimple<Department>(
-					value => _viewModel.General.Departments = value, _viewModel.General);
+					value => { }, _viewModel.General);
 
 				});
 		}
@@ -130,6 +131,7 @@ namespace Apteka.View.EmployeeV
 			dtpDateBirthMax.Value = new(dates[1], new TimeOnly());
 
 			dates = _viewModel.GetMinMaxDatesFire();
+			if (dates.Length == 0) return;
 			dtpDateFireMin.Value = new(dates[0], new TimeOnly());
 			dtpDateFireMax.Value = new(dates[1], new TimeOnly());
 		}

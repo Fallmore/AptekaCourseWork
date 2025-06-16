@@ -298,8 +298,6 @@
 		private ComboBox cbPost;
 		private Label label4;
 		private Label label5;
-		private Label label6;
-		private Label label7;
 		private TextBox tbName;
 		private TextBox tbAddress;
 		private Label label1;

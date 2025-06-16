@@ -384,7 +384,6 @@
 		private SplitContainer splitContainer2;
 		private DataGridView dgvMedicineProduct;
 		private ContextMenuStrip cmsWaybill;
-		private Label label8;
 		private Label label1;
 		private TextBox tbIdWaybill;
 		private DateTimePicker dtpDateWaybillMin;

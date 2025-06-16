@@ -17,6 +17,7 @@ namespace Apteka.View.EmployeeV
 		public EmployeesForm()
 		{
 			InitializeComponent();
+			TopMost = true;
 			_viewModel = new();
 			_viewModel.ConfigureSettingsDGV(dgvEmployees);
 			_viewModel.SetDefaultDataSource(dgvEmployees);
@@ -34,8 +35,16 @@ namespace Apteka.View.EmployeeV
 			_viewModel.General.DatabaseNotificationService.Subscribe<EmployeesForm>("employee",
 				data =>
 				{
-					RefreshData<Employee>(_viewModel.General.Employees,
-					value => _viewModel.General.Employees = value,
+					RefreshData<Employee>([],
+					value => { },
+					 data, () => _viewModel.SetDefaultDataSource(dgvEmployees));
+				});
+
+			_viewModel.General.DatabaseNotificationService.Subscribe<EmployeesForm>("employee_fired",
+				data =>
+				{
+					RefreshData<EmployeeFired>([],
+					value => { },
 					 data, () => _viewModel.SetDefaultDataSource(dgvEmployees));
 				});
 		}
@@ -55,7 +64,6 @@ namespace Apteka.View.EmployeeV
 					RefreshDataSimple<Post>(
 					value =>
 					{
-						_viewModel.General.Posts = value;
 						cbDepartment.DataSource = _viewModel.General.GetListWithEmptyItem(_viewModel.GetDepartment(), new())
 							.Select(d => new ComboBoxItem { Name = d.Name, Id = d.IdDepartment }).OrderBy(cbi => cbi.Name).ToList();
 					}, _viewModel.General);
@@ -68,29 +76,9 @@ namespace Apteka.View.EmployeeV
 					RefreshDataSimple<Department>(
 					value =>
 					{
-						_viewModel.General.Departments = value;
 						cbPost.DataSource = _viewModel.General.GetListWithEmptyItem(_viewModel.GetPost(), new())
 							.Select(d => new ComboBoxItem { Name = d.Name, Id = d.IdPost }).OrderBy(cbi => cbi.Name).ToList();
 					}, _viewModel.General);
-
-				});
-
-			_viewModel.General.DatabaseNotificationService.Subscribe<EmployeesForm>("employee_account",
-				data =>
-				{
-					RefreshDataSimple<EmployeeAccount>(
-					value => _viewModel.General.EmployeeAccounts = value,
-					_viewModel.General);
-
-				});
-
-			_viewModel.General.DatabaseNotificationService.Subscribe<EmployeesForm>("employee_fired",
-				data =>
-				{
-					RefreshDataSimple<EmployeeFired>(
-					value => _viewModel.General.EmployeeFireds = value,
-					_viewModel.General);
-
 				});
 		}
 
@@ -305,7 +293,7 @@ namespace Apteka.View.EmployeeV
 
 				bool isSuccess = _viewModel.InsertOrderAssign(int.Parse(af.tbNumberOrder.Text),
 					idEmployee,
-					int.Parse(af.cbNewPost.SelectedValue.ToString() ?? ""),
+					int.Parse(af.cbNewPost.SelectedValue?.ToString() ?? ""),
 					af.rtbReason.Text);
 
 				if (!isSuccess)

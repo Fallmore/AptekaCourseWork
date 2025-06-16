@@ -171,7 +171,6 @@
 		private TextBox tbLogin;
 		private TextBox tbPassword;
 		private Label label2;
-		private Button button2;
 		private Button btnOK;
 		internal Label lblMatchPassword;
 		internal TextBox tbMatchPassword;

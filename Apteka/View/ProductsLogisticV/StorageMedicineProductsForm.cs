@@ -17,6 +17,7 @@ namespace Apteka.View.ProductsLogisticV
 		public StorageMedicineProductsForm()
 		{
 			InitializeComponent();
+			TopMost = true;
 			_viewModel = new();
 			_viewModel.ConfigureSettingsDGV(dgvStorageMedicineProducts);
 			_viewModel.SetDefaultDataSource(dgvStorageMedicineProducts);
@@ -33,8 +34,8 @@ namespace Apteka.View.ProductsLogisticV
 			_viewModel.General.DatabaseNotificationService.Subscribe<StorageMedicineProductsForm>("storage_medicine_product",
 				data =>
 				{
-					RefreshData<StorageMedicineProduct>(_viewModel.General.StorageMedicineProducts,
-					value => _viewModel.General.StorageMedicineProducts = value, data,
+					RefreshData<StorageMedicineProduct>([],
+					value => { }, data,
 					() => _viewModel.SetDefaultDataSource(dgvStorageMedicineProducts));
 
 				});
@@ -48,7 +49,7 @@ namespace Apteka.View.ProductsLogisticV
 				data =>
 				{
 					RefreshDataSimple<StoragePlace>(
-					value => _viewModel.General.StoragePlaces = value, _viewModel.General);
+					value => { }, _viewModel.General);
 
 				});
 
@@ -56,7 +57,7 @@ namespace Apteka.View.ProductsLogisticV
 				data =>
 				{
 					RefreshDataSimple<StoragePharmacy>(
-					value => _viewModel.General.StoragePharmacies = value, _viewModel.General);
+					value => { }, _viewModel.General);
 
 				});
 
@@ -64,7 +65,7 @@ namespace Apteka.View.ProductsLogisticV
 				data =>
 				{
 					RefreshDataSimple<Department>(
-					value => _viewModel.General.Departments = value, _viewModel.General);
+					value => { }, _viewModel.General);
 
 				});
 		}
@@ -141,7 +142,8 @@ namespace Apteka.View.ProductsLogisticV
 				[
 					((ComboBoxItem)(cbDepartment.SelectedItem ?? new ComboBoxItem())).Id,
 					((ComboBoxItem)(cbStorage.SelectedItem ?? new ComboBoxItem())).Id,
-					((ComboBoxItem)(cbPlace.SelectedItem ?? new ComboBoxItem())).Id], (Guid)cbMedicineProductName.SelectedValue);
+					((ComboBoxItem)(cbPlace.SelectedItem ?? new ComboBoxItem())).Id], 
+				(Guid)(cbMedicineProductName.SelectedValue ?? new()));
 
 			if (results == null) return;
 
@@ -224,13 +226,18 @@ namespace Apteka.View.ProductsLogisticV
 
 		private void dgvStorageMedicineProducts_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
 		{
-			if (e.RowIndex < 0 || e.ColumnIndex < 0) return;
+			if (e.RowIndex < 0 || e.ColumnIndex < 0 || e.CellStyle == null) return;
 
-			DataGridViewRow row = dgvStorageMedicineProducts.Rows[e.RowIndex];
+			StorageMedicineProductWrapper? row = dgvStorageMedicineProducts.Rows[e.RowIndex].DataBoundItem as StorageMedicineProductWrapper;
+			if (row == null) return;
 
-			if (bool.Parse(row.Cells["IsCriticalAmount"].Value.ToString() ?? "false"))
+			Color color;
+			if (row.IsCriticalAmount)
 			{
-				e.CellStyle.BackColor = Color.LightPink;
+				color = Color.Gold;
+				if (row.Amount == 0) color = Color.LightPink;
+
+				e.CellStyle.BackColor = color;
 				e.CellStyle.ForeColor = Color.DarkRed;
 				e.CellStyle.SelectionBackColor = e.CellStyle.BackColor;
 				e.CellStyle.SelectionForeColor = Color.Black;

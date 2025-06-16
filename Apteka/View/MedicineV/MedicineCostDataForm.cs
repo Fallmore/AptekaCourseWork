@@ -5,6 +5,7 @@
 		public MedicineCostDataForm()
 		{
 			InitializeComponent();
+			TopMost = true;
 		}
 
 		private void tbCost_KeyPress(object sender, KeyPressEventArgs e)

@@ -6,7 +6,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking.Internal;
 using Microsoft.Extensions.Configuration;
 using System.ComponentModel.DataAnnotations;
-using System.Diagnostics;
 using System.Reflection;
 
 namespace Apteka.ViewModel
@@ -20,11 +19,9 @@ namespace Apteka.ViewModel
 		// Хранит все открытые формы
 		private FormCollection _fc;
 
-		private string _mainUsername = "postgres";
-		//#error Впиши свой пароль к БД
-		private string _mainPassword = "slavik242";
 		private int _ChoosedRole;
 
+		private List<Type> _loadedTables = [];
 		#region Данные таблиц БД
 		private List<Medicine> _medicines = [];
 		private List<MedicineProduct> _medicineProducts = [];
@@ -57,6 +54,7 @@ namespace Apteka.ViewModel
 		// Guid препаратов с истекшим сроком годности
 		private List<Guid> _medicineProductsExpired = [];
 		private TimeSpan _criticalDaysOfExpiration = TimeSpan.FromDays(31);
+		private double _criticalDays = 31;
 		// Препараты на складе с критическим количеством
 		private List<StorageMedicineProduct> _medicineProductsCriticalAmount = [];
 		private float _criticalAmount = 5;
@@ -230,18 +228,22 @@ namespace Apteka.ViewModel
 		public int HourOfEndWork { get => _hourOfEndWork; set => _hourOfEndWork = value; }
 		public string PathReport { get => _pathReport; set => _pathReport = value; }
 		public int ChoosedRole { get => _ChoosedRole; set => _ChoosedRole = value; }
-		public string MainPassword { get => _mainPassword; set => _mainPassword = value; }
-		public string MainUsername { get => _mainUsername; set => _mainUsername = value; }
+		public double CriticalDays { get => _criticalDays; set => _criticalDays = value; }
+		public List<Type> LoadedTables { get => _loadedTables; set => _loadedTables = value; }
 
 		private GeneralViewModel() { }
 
 		public async void Initialize()
 		{
-			_aptekaContext = AptekaContextFactory.Create(_mainUsername, _mainPassword);
-			_aptekaContext.Database.EnsureCreated();
-			_databaseNotificationService = new(_aptekaContext.Database.GetConnectionString() ?? "");
 			_fc = Application.OpenForms;
-			await ExecuteDailyFunctions();
+			_aptekaContext = AptekaContextFactory
+				.Create(Settings.Default.Username, Settings.Default.Password);
+			if (AptekaContextFactory.CanConnect)
+			{
+				_aptekaContext.Database.EnsureCreated();
+				_databaseNotificationService = new(_aptekaContext.Database.GetConnectionString() ?? "");
+				await ExecuteDailyFunctions();
+			}
 		}
 
 		private async Task ExecuteDailyFunctions()
@@ -254,7 +256,8 @@ namespace Apteka.ViewModel
 
 		private async Task CheckDateExpiration()
 		{
-			await using var localContext = AptekaContextFactory.Create(_mainUsername, _mainPassword);
+			await using var localContext = AptekaContextFactory
+				.Create(Settings.Default.Username, Settings.Default.Password);
 			_medicineProductsExpired = await localContext.Database
 					.SqlQueryRaw<Guid>("SELECT * FROM check_expired_medicine_product({0})", _criticalDaysOfExpiration)
 					.ToListAsync();
@@ -263,7 +266,8 @@ namespace Apteka.ViewModel
 
 		private async Task CheckCriticalAmount()
 		{
-			await using var localContext = AptekaContextFactory.Create(_mainUsername, _mainPassword);
+			await using var localContext = AptekaContextFactory
+				.Create(Settings.Default.Username, Settings.Default.Password);
 			_medicineProductsCriticalAmount = await localContext.StorageMedicineProducts
 					.FromSqlRaw("SELECT * FROM check_critical_amount_medicine_product({0})", _criticalAmount)
 					.ToListAsync();
@@ -272,14 +276,16 @@ namespace Apteka.ViewModel
 
 		private async Task ClearMedicineProductSales()
 		{
-			await using var localContext = AptekaContextFactory.Create(_mainUsername, _mainPassword);
+			await using var localContext = AptekaContextFactory
+				.Create(Settings.Default.Username, Settings.Default.Password);
 			localContext.Database.ExecuteSql($"CALL clear_medicine_product_sales()");
 			return;
 		}
 
 		private async Task ClearEmployeeData()
 		{
-			await using var localContext = AptekaContextFactory.Create(_mainUsername, _mainPassword);
+			await using var localContext = AptekaContextFactory
+				.Create(Settings.Default.Username, Settings.Default.Password);
 			localContext.Database
 				   .ExecuteSql($"CALL clear_employee_data()");
 			return;
@@ -287,15 +293,16 @@ namespace Apteka.ViewModel
 
 		private List<T> LoadIfEmpty<T>(List<T> privateList, IQueryable<T> dbSet) where T : class
 		{
-			if (privateList.Count == 0)
+			if (!_loadedTables.Contains(typeof(T)))
 			{
 				try
 				{
-					return dbSet.AsNoTracking().ToList();
+					List<T> list = dbSet.AsNoTracking().ToList();
+					_loadedTables.Add(typeof(T));
+					return list;
 				}
-				catch (Exception ex)
+				catch (Exception)
 				{
-					Debug.WriteLine($"Ошибка загрузки данных {typeof(T).Name}: {ex.Message}");
 					return privateList;
 				}
 			}

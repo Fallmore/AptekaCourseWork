@@ -18,6 +18,7 @@ namespace Apteka.View
 		public WaybillsForm()
 		{
 			InitializeComponent();
+			TopMost = true;
 			_viewModel = new();
 			_viewModel.ConfigureSettingsDGV<WaybillWrapper>(dgvWaybill);
 			_viewModel.SetDefaultDataSource<WaybillWrapper>(dgvWaybill);
@@ -37,8 +38,8 @@ namespace Apteka.View
 			_viewModel.General.DatabaseNotificationService.Subscribe<WaybillsForm>("waybill",
 				data =>
 				{
-					RefreshData<Waybill>(_viewModel.General.Waybills,
-					value => _viewModel.General.Waybills = value, data,
+					RefreshData<Waybill>([],
+					value => { }, data,
 					() => _viewModel.SetDefaultDataSource<WaybillWrapper>(dgvWaybill));
 
 				});
@@ -46,8 +47,8 @@ namespace Apteka.View
 			_viewModel.General.DatabaseNotificationService.Subscribe<WaybillsForm>("waybill_medicine_product",
 				data =>
 				{
-					RefreshData<WaybillMedicineProduct>(_viewModel.General.WaybillsMedicineProduct,
-					value => _viewModel.General.WaybillsMedicineProduct = value, data,
+					RefreshData<WaybillMedicineProduct>([],
+					value => { }, data,
 					() => _viewModel.SetDefaultDataSource<WaybillMedicineProduct>(dgvMedicineProduct));
 
 				});

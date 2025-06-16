@@ -10,6 +10,7 @@ namespace Apteka.View.EmployeeV
 		public EmployeeRolesForm()
 		{
 			InitializeComponent();
+			TopMost = true;
 			_viewModel = new();
 			SetItemRoles();
 		}

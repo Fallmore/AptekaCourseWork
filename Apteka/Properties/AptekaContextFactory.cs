@@ -6,11 +6,13 @@ namespace Apteka.Properties
 {
 	internal class AptekaContextFactory
 	{
+		internal static bool CanConnect = false;
 		internal static AptekaContext Create(string username, string password)
 		{
-			var originalConnectionString = "Host=localhost;Database=Apteka;";
-			var builder = new NpgsqlConnectionStringBuilder(originalConnectionString)
+			var builder = new NpgsqlConnectionStringBuilder()
 			{
+				Host = Settings.Default.Host,
+				Database = Settings.Default.Database,
 				Username = username,
 				Password = password
 			};
@@ -18,7 +20,10 @@ namespace Apteka.Properties
 			var optionsBuilder = new DbContextOptionsBuilder<AptekaContext>();
 			optionsBuilder.UseNpgsql(builder.ToString());
 
-			return new AptekaContext(optionsBuilder.Options);
+			AptekaContext dbContext = new(optionsBuilder.Options);
+			CanConnect = dbContext.Database.CanConnect();
+
+			return dbContext;
 		}
 	}
 }

@@ -38,6 +38,7 @@ namespace Apteka.View.MedicineV
 		public MedicineProductsForm()
 		{
 			InitializeComponent();
+			TopMost = true;
 			_viewModel = new();
 			_viewModel.ConfigureSettingsDGV<MedicineProductWrapper>(dgvMedicineProduct);
 			_viewModel.SetDefaultDataSourceMedicineProduct(dgvMedicineProduct);
@@ -54,8 +55,8 @@ namespace Apteka.View.MedicineV
 			_viewModel.General.DatabaseNotificationService.Subscribe<MedicineProductsForm>("medicine_product",
 				data =>
 				{
-					RefreshData<MedicineProduct>(_viewModel.General.MedicineProducts,
-					value => _viewModel.General.MedicineProducts = value, data,
+					RefreshData<MedicineProduct>([],
+					value => { }, data,
 					() => _viewModel.SetDefaultDataSourceMedicineProduct(dgvMedicineProduct));
 
 				});
@@ -63,8 +64,8 @@ namespace Apteka.View.MedicineV
 			_viewModel.General.DatabaseNotificationService.Subscribe<MedicineProductsForm>("medicine_cost",
 				data =>
 				{
-					RefreshData<MedicineCost>(_viewModel.General.MedicineCosts,
-					value => _viewModel.General.MedicineCosts = value, data,
+					RefreshData<MedicineCost>([],
+					value => { }, data,
 					() => ShowCost(dgvMedicineProduct.SelectedRows[0]));
 
 				});
@@ -262,7 +263,7 @@ namespace Apteka.View.MedicineV
 
 		private void ShowCost(DataGridViewRow row)
 		{
-			int idMedicine = int.Parse(row.Cells["IdMedicine"].Value.ToString());
+			int idMedicine = int.Parse(row.Cells["IdMedicine"].Value.ToString() ?? "");
 			List<MedicineCost> costs = _viewModel.General.MedicineCosts
 				.Where(mc => mc.IdMedicine == idMedicine).ToList();
 			dgvMedicineProductCost.DataSource = new SortableBindingList<MedicineCost>(costs);
@@ -348,7 +349,7 @@ namespace Apteka.View.MedicineV
 
 		private void dgvMedicineProduct_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
 		{
-			if (e.RowIndex < 0 || e.ColumnIndex < 0) return;
+			if (e.RowIndex < 0 || e.ColumnIndex < 0 || e.CellStyle == null) return;
 
 			DataGridViewRow row = dgvMedicineProduct.Rows[e.RowIndex];
 
@@ -361,7 +362,7 @@ namespace Apteka.View.MedicineV
 			}
 			else
 			{
-				bool isExpired = DateOnly.Parse(row.Cells["DateExpiration"].Value.ToString())
+				bool isExpired = DateOnly.Parse(row.Cells["DateExpiration"].Value.ToString() ?? "")
 					<= DateOnly.FromDateTime(DateTime.Now).AddDays(_viewModel.General.CriticalTimeOfExpiration.Days);
 				if (isExpired)
 				{
@@ -459,7 +460,7 @@ namespace Apteka.View.MedicineV
 			DataGridViewRow row = dgvMedicineProduct.SelectedRows[0];
 			Guid idMedicineProduct = new(row.Cells["IdMedicineProduct"].Value.ToString() ?? string.Empty);
 			string reason = "Просрочено";
-			DialogResult dlgRsult = DialogResult.Cancel;
+			DialogResult dlgRsult = DialogResult.OK;
 
 			if (!isExpired)
 			{

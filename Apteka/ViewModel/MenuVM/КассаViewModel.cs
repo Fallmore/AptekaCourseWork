@@ -143,9 +143,9 @@ namespace Apteka.ViewModel.MenuVM
 				General.AptekaContext.SaveChanges();
 				return true;
 			}
-			catch (PostgresException ex)
+			catch (DbUpdateException ex)
 			{
-				string message = ex.Message;
+				string message = ex.InnerException?.Message ?? "";
 
 				MessageBox.Show(message, "Ошибка данных",
 						MessageBoxButtons.OK, MessageBoxIcon.Error);
@@ -163,9 +163,9 @@ namespace Apteka.ViewModel.MenuVM
 					General.AptekaContext.HistorySales.Remove(sale);
 				General.AptekaContext.SaveChanges();
 			}
-			catch (PostgresException ex)
+			catch (DbUpdateException ex)
 			{
-				string message = ex.Message;
+				string message = ex.InnerException?.Message ?? "";
 
 				MessageBox.Show(message, "Ошибка данных",
 						MessageBoxButtons.OK, MessageBoxIcon.Error);

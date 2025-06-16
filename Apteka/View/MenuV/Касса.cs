@@ -1,13 +1,14 @@
 ﻿using Apteka.BaseClasses;
 using Apteka.Model;
+using Apteka.View.LoginV;
 using Apteka.View.MedicineV;
 using Apteka.View.SimpleV;
 using Apteka.ViewModel.EmployeeVM;
 using Apteka.ViewModel.MenuVM;
 using Apteka.ViewModel.ProductsLogisticVM;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking.Internal;
 using System.ComponentModel;
-using System.Diagnostics;
 
 namespace Apteka.View.MenuV
 {
@@ -35,8 +36,8 @@ namespace Apteka.View.MenuV
 			SubscribeTable();
 			HideTechnicalColumns();
 			SetCmsMedicineProductItems();
-			_viewModel.General.SetFormByRole(null, null, dgvStorageMedicineProduct);
-			_viewModel.General.SetFormByRole(null, null, dgvAnaloguesStorageMedicineProduct);
+			_viewModel?.General.SetFormByRole(null, null, dgvStorageMedicineProduct);
+			_viewModel?.General.SetFormByRole(null, null, dgvAnaloguesStorageMedicineProduct);
 		}
 
 		private void Init()
@@ -83,6 +84,48 @@ namespace Apteka.View.MenuV
 				{
 					RefreshData<MedicineProduct>(_viewModel.General.MedicineProducts,
 					value => _viewModel.General.MedicineProducts = value, data);
+
+				});
+
+			_viewModel.General.DatabaseNotificationService.Subscribe<Касса>("medicine_product_decommissioned",
+				data =>
+				{
+					RefreshData<MedicineProductDecommissioned>(_viewModel.General.MedicineProductDecommissioneds,
+					value => _viewModel.General.MedicineProductDecommissioneds = value, data);
+
+				});
+
+			_viewModel.General.DatabaseNotificationService.Subscribe<Касса>("medicine_cost",
+				data =>
+				{
+					RefreshData<MedicineCost>(_viewModel.General.MedicineCosts,
+					value => _viewModel.General.MedicineCosts = value, data);
+
+				});
+
+			_viewModel.General.DatabaseNotificationService.Subscribe<Касса>("medicine",
+				data =>
+				{
+					RefreshData<Medicine>(_viewModel.General.Medicines,
+					value => _viewModel.General.Medicines = value, data);
+				});
+		}
+
+		private void SubscribeDictionaries()
+		{
+			_viewModel.General.DatabaseNotificationService.Subscribe<Касса>("storage_place",
+				data =>
+				{
+					RefreshDataSimple<StoragePlace>(
+					value => _viewModel.General.StoragePlaces = value, _viewModel.General);
+
+				});
+
+			_viewModel.General.DatabaseNotificationService.Subscribe<Касса>("storage_pharmacy",
+				data =>
+				{
+					RefreshDataSimple<StoragePharmacy>(
+					value => _viewModel.General.StoragePharmacies = value, _viewModel.General);
 
 				});
 		}
@@ -161,9 +204,8 @@ namespace Apteka.View.MenuV
 				return _viewModel.General.AptekaContext.StorageMedicineProducts
 					.Find(smp.IdDepartment, smp.IdStorage, smp.IdPlace, smp.IdMedicineProduct);
 			}
-			catch (Exception ex)
+			catch (Exception)
 			{
-				Debug.WriteLine(ex.Message);
 				return null;
 			}
 		}
@@ -184,9 +226,13 @@ namespace Apteka.View.MenuV
 					_viewModel.General.AptekaContext.SaveChanges();
 				}
 			}
-			catch (Exception ex)
+			catch (DbUpdateException ex)
 			{
-				Debug.WriteLine(ex.Message);
+				string message = ex.InnerException?.Message ?? "";
+
+				MessageBox.Show(message, "Ошибка данных",
+						MessageBoxButtons.OK, MessageBoxIcon.Error);
+
 			}
 		}
 
@@ -429,40 +475,35 @@ namespace Apteka.View.MenuV
 			RemoveAllPickedMedicineProduct();
 		}
 
+		private T ShowForm<T>() where T : Form, new()
+		{
+			T? form = _viewModel.General.GetActivatedForm<T>();
+
+			form ??= new();
+
+			form.Visible = true;
+			form.Show();
+			return form;
+		}
+
 		private void лекарстваToolStripMenuItem1_Click(object sender, EventArgs e)
 		{
-			MedicinesForm? mf = _viewModel.General.GetActivatedForm<MedicinesForm>();
-
-			mf ??= new();
-
-			mf.Show();
+			ShowForm<MedicinesForm>();
 		}
 
 		private void препаратыToolStripMenuItem_Click(object sender, EventArgs e)
 		{
-			MedicineProductsForm? mpf = _viewModel.General.GetActivatedForm<MedicineProductsForm>();
-
-			mpf ??= new();
-
-			mpf.Show();
+			ShowForm<MedicineProductsForm>();
 		}
 
 		private void списанныеПрепаратыToolStripMenuItem_Click(object sender, EventArgs e)
 		{
-			MedicineProductDecommissionedForm? mpdf = _viewModel.General.GetActivatedForm<MedicineProductDecommissionedForm>();
-
-			mpdf ??= new();
-
-			mpdf.Show();
+			ShowForm<MedicineProductDecommissionedForm>();
 		}
 
 		private void справкаToolStripMenuItem_Click(object sender, EventArgs e)
 		{
-			AboutForm? af = _viewModel.General.GetActivatedForm<AboutForm>();
-
-			af ??= new();
-
-			af.Show();
+			ShowForm<AboutForm>();
 		}
 
 		private void tsbSale_Click(object sender, EventArgs e)
@@ -477,6 +518,25 @@ namespace Apteka.View.MenuV
 			}
 
 			RemoveAllPickedMedicineProduct();
+		}
+
+		private void HideForms()
+		{
+			FormCollection formCollection = Application.OpenForms;
+			bool hide = false;
+			if (this.WindowState == FormWindowState.Minimized)
+				hide = false;
+			else if (this.WindowState == FormWindowState.Maximized)
+				hide = true;
+
+			foreach (Form form in formCollection)
+				if (form.Name != this.Name && form.Name != new LoginForm().Name)
+					form.Visible = hide;
+		}
+
+		private void Form_SizeChanged(object sender, EventArgs e)
+		{
+			HideForms();
 		}
 	}
 }

@@ -61,7 +61,7 @@ namespace Apteka.View.LoginV
 			catch (NpgsqlException ex)
 			{
 				MessageBox.Show(ex.Message.Split(':').Skip(1).FirstOrDefault()?.Trim(),
-					"Ошибка ввода данных", MessageBoxButtons.OK, MessageBoxIcon.Information);
+					"Ошибка ввода данных", MessageBoxButtons.OK, MessageBoxIcon.Error);
 			}
 		}
 

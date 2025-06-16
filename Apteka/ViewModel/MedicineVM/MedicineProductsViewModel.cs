@@ -131,18 +131,25 @@ namespace Apteka.ViewModel.MedicineVM
 
 				return true;
 			}
-			catch (PostgresException ex)
+			catch (DbUpdateException ex)
 			{
-				string message = ex.Message;
+				string message = ex.InnerException?.Message ?? "";
 
-				string constraintName = ex.ConstraintName ?? "";
-				if (constraintName.Contains("empty"))
+				if (message.Contains("empty"))
 					message = "Ошибка! Пустые поля, пожалуйста, заполните все поля!";
-				else if (constraintName.Contains("wrong_date_expiration"))
+				else if (message.Contains("wrong_date_expiration"))
 					message = "Ошибка! Срок годности не может быть раньше срока изготовления!";
+				else if (message.Contains("serial_number"))
+					message = "Ошибка! Серийный номер уже существует!";
 
 				MessageBox.Show(message, "Ошибка данных",
 						MessageBoxButtons.OK, MessageBoxIcon.Error);
+				return false;
+			}
+			catch (NpgsqlException ex)
+			{
+				MessageBox.Show(ex.Message, "Ошибка данных",
+			MessageBoxButtons.OK, MessageBoxIcon.Error);
 				return false;
 			}
 		}

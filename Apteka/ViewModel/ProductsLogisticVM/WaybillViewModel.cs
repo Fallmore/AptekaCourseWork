@@ -79,7 +79,7 @@ namespace Apteka.ViewModel.ProductsLogisticVM
 					.FromSqlRaw("SELECT * FROM search_waybill({0}, {1}, {2}, {3}, {4}," +
 					"{5}, {6});", w.IdWaybill,
 					w.IdEmployee == new Guid() ? null : w.IdEmployee,
-					idMedicineProduct,
+					idMedicineProduct == new Guid() ? null : idMedicineProduct,
 					w.IdSupplier, w.IdDepartment, doParams[0], doParams[1])
 					.ToListAsync();
 

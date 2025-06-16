@@ -17,14 +17,12 @@ namespace Apteka.View.MedicineV
 		public MedicineProductDataForm(MedicineProduct? mp = null)
 		{
 			InitializeComponent();
+			TopMost = true;
 			_viewModel = new();
 			_viewModel.General.SetDefaultSettingsToDGV(dgvComponents);
 			SetDataSourceToComboBoxes();
-			SubscribeTable();
 			SetMedicineProductData(mp);
-			dgvComponents.Rows[0].Cells[0].Value = "Амоксициллин";
-			dgvComponents.Rows[0].Cells[1].Value = "200";
-			dgvComponents.Rows[0].Cells[2].Value = "мг.";
+			dgvComponents.Rows.Add(["Амоксициллин", "200", "мг."]);
 		}
 
 		private void SetDataSourceToComboBoxes()
@@ -55,25 +53,6 @@ namespace Apteka.View.MedicineV
 				?? new();
 			cbMeasure.DataSource = _viewModel.General.MeasureMeasurabilities
 							.Select(mm => mm.Measure).ToList();
-		}
-
-		private void SubscribeTable()
-		{
-			_viewModel.General.DatabaseNotificationService.Subscribe<MedicineProductDataForm>("medicine_product",
-				data =>
-				{
-					RefreshData<MedicineProduct>(_viewModel.General.MedicineProducts,
-					value => _viewModel.General.MedicineProducts = value, data);
-
-				});
-
-			_viewModel.General.DatabaseNotificationService.Subscribe<MedicineProductDataForm>("medicine_cost",
-				data =>
-				{
-					RefreshData<MedicineCost>(_viewModel.General.MedicineCosts,
-					value => _viewModel.General.MedicineCosts = value, data);
-
-				});
 		}
 
 		private void SetMedicineProductData(MedicineProduct? mp)
@@ -152,7 +131,7 @@ namespace Apteka.View.MedicineV
 			MedicineProduct medicineProduct = new()
 			{
 				IdMedicineProduct = NewMedicineProduct.IdMedicineProduct,
-				IdMedicine = int.Parse(cbMedicine.SelectedValue.ToString() ?? "-1"),
+				IdMedicine = int.Parse(cbMedicine.SelectedValue?.ToString() ?? "-1"),
 				SerialNumber = tbSerialNumber.Text,
 				Form = cbMedicineForm.Text,
 				Amount = int.Parse(tbAmount.Text),
@@ -224,18 +203,18 @@ namespace Apteka.View.MedicineV
 				if (row.IsNewRow) continue;
 
 				Dictionary<string, object> rowData = [];
-				for (int i = 0; i < row.Cells.Count; i++)
+                for (int i = row.Cells.Count-2; i >= 0; i--)
 				{
 					DataGridViewCell cell = row.Cells[i];
 					if (i == 0)
 					{
-						if (cell.Value.ToString().Trim() == "") return "[]";
+						if (cell.Value.ToString()?.Trim() == "") return "[]";
 						rowData["Вещество"] = cell.Value;
 					}
 					else
 					{
-						string measure = row.Cells[++i].Value.ToString() ?? "";
-						if (cell.Value.ToString().Trim() == "" || measure.Trim() == "")
+						string measure = row.Cells[i+1].Value.ToString() ?? "";
+						if (cell.Value.ToString()?.Trim() == "" || measure.Trim() == "")
 							return "[]";
 
 						rowData["Мера"]
@@ -253,7 +232,7 @@ namespace Apteka.View.MedicineV
 		{
 			if (dgvComponents.CurrentCell.ColumnIndex == 0)
 			{
-				TextBox textBox = e.Control as TextBox;
+				TextBox textBox = (e.Control as TextBox) ?? new();
 				if (textBox != null)
 				{
 					textBox.AutoCompleteMode = AutoCompleteMode.SuggestAppend;
@@ -263,14 +242,14 @@ namespace Apteka.View.MedicineV
 						.Select(mp => JArray.Parse(mp.Components))
 						.SelectMany(ja => ja)
 						.Where(item => item["Вещество"] != null)
-						.Select(item => item["Вещество"].ToString())
+						.Select(item => item["Вещество"]?.ToString() ?? "")
 						.OrderBy(name => name)
 						.Distinct().ToArray());
 				}
 			}
 			else if (dgvComponents.CurrentCell.ColumnIndex == 1)
 			{
-				TextBox textBox = e.Control as TextBox;
+				TextBox textBox = (e?.Control as TextBox) ?? new();
 				textBox.KeyPress += tbNumber_KeyPress;
 			}
 		}

@@ -1,5 +1,7 @@
-﻿using Apteka.Model;
+﻿using Apteka.BaseClasses;
+using Apteka.Model;
 using Apteka.View.EmployeeV;
+using Apteka.View.LoginV;
 using Apteka.View.MedicineV;
 using Apteka.View.ProductsLogisticV;
 using Apteka.View.SimpleV;
@@ -9,7 +11,7 @@ using System.Data;
 
 namespace Apteka.View.MenuV
 {
-	public partial class OnlyMenuForm : Form
+	public partial class OnlyMenuForm : FormWithNotification
 	{
 		private OnlyMenuViewModel _viewModel;
 
@@ -18,6 +20,156 @@ namespace Apteka.View.MenuV
 			InitializeComponent();
 			_viewModel = new();
 			SetFormByRole();
+			SubscribeTable();
+			SubscribeDictionaries();
+		}
+
+		private void SubscribeTable()
+		{
+			_viewModel.General.DatabaseNotificationService.Subscribe<OnlyMenuForm>("employee",
+				data =>
+				{
+					RefreshData<Employee>(_viewModel.General.Employees,
+					value => _viewModel.General.Employees = value,
+					 data);
+				});
+
+			_viewModel.General.DatabaseNotificationService.Subscribe<OnlyMenuForm>("employee_fired",
+				data =>
+				{
+					RefreshData<EmployeeFired>(_viewModel.General.EmployeeFireds,
+					value => _viewModel.General.EmployeeFireds = value,
+					 data);
+				});
+
+			_viewModel.General.DatabaseNotificationService.Subscribe<OnlyMenuForm>("order_assign",
+				data =>
+				{
+					RefreshData<OrderAssign>(_viewModel.General.OrderAssigns,
+					value => _viewModel.General.OrderAssigns = value, data);
+
+				});
+
+			_viewModel.General.DatabaseNotificationService.Subscribe<OnlyMenuForm>("medicine_product_decommissioned",
+				data =>
+				{
+					RefreshData<MedicineProductDecommissioned>(_viewModel.General.MedicineProductDecommissioneds,
+					value => _viewModel.General.MedicineProductDecommissioneds = value, data);
+
+				});
+
+			_viewModel.General.DatabaseNotificationService.Subscribe<OnlyMenuForm>("medicine_product",
+				data =>
+				{
+					RefreshData<MedicineProduct>(_viewModel.General.MedicineProducts,
+					value => _viewModel.General.MedicineProducts = value, data);
+
+				});
+
+			_viewModel.General.DatabaseNotificationService.Subscribe<OnlyMenuForm>("medicine_cost",
+				data =>
+				{
+					RefreshData<MedicineCost>(_viewModel.General.MedicineCosts,
+					value => _viewModel.General.MedicineCosts = value, data);
+
+				});
+
+			_viewModel.General.DatabaseNotificationService.Subscribe<OnlyMenuForm>("medicine",
+				data =>
+				{
+					RefreshData<Medicine>(_viewModel.General.Medicines,
+					value => _viewModel.General.Medicines = value, data);
+				});
+
+			_viewModel.General.DatabaseNotificationService.Subscribe<OnlyMenuForm>("history_sale",
+				data =>
+				{
+					RefreshData<HistorySale>(_viewModel.General.HistorySales,
+					value => _viewModel.General.HistorySales = value, data);
+
+				});
+
+			_viewModel.General.DatabaseNotificationService.Subscribe<OnlyMenuForm>("history_sale_medicine_product",
+				data =>
+				{
+					RefreshData<HistorySaleMedicineProduct>(_viewModel.General.HistorySalesMedicineProduct,
+					value => _viewModel.General.HistorySalesMedicineProduct = value, data);
+
+				});
+
+			_viewModel.General.DatabaseNotificationService.Subscribe<OnlyMenuForm>("storage_medicine_product",
+				data =>
+				{
+					RefreshData<StorageMedicineProduct>(_viewModel.General.StorageMedicineProducts,
+					value => _viewModel.General.StorageMedicineProducts = value, data);
+
+				});
+
+			_viewModel.General.DatabaseNotificationService.Subscribe<OnlyMenuForm>("waybill",
+				data =>
+				{
+					RefreshData<Waybill>(_viewModel.General.Waybills,
+					value => _viewModel.General.Waybills = value, data);
+
+				});
+
+			_viewModel.General.DatabaseNotificationService.Subscribe<OnlyMenuForm>("waybill_medicine_product",
+				data =>
+				{
+					RefreshData<WaybillMedicineProduct>(_viewModel.General.WaybillsMedicineProduct,
+					value => _viewModel.General.WaybillsMedicineProduct = value, data);
+
+				});
+		}
+
+		private void SubscribeDictionaries()
+		{
+			_viewModel.General.DatabaseNotificationService.Subscribe<OnlyMenuForm>("post",
+				data =>
+				{
+					RefreshDataSimple<Post>(
+					value =>
+					{
+						_viewModel.General.Posts = value;
+					}, _viewModel.General);
+
+				});
+
+			_viewModel.General.DatabaseNotificationService.Subscribe<OnlyMenuForm>("department",
+				data =>
+				{
+					RefreshDataSimple<Department>(
+					value =>
+					{
+						_viewModel.General.Departments = value;
+					}, _viewModel.General);
+
+				});
+
+			_viewModel.General.DatabaseNotificationService.Subscribe<OnlyMenuForm>("employee_account",
+				data =>
+				{
+					RefreshDataSimple<EmployeeAccount>(
+					value => _viewModel.General.EmployeeAccounts = value,
+					_viewModel.General);
+
+				});
+
+			_viewModel.General.DatabaseNotificationService.Subscribe<OnlyMenuForm>("storage_place",
+				data =>
+				{
+					RefreshDataSimple<StoragePlace>(
+					value => _viewModel.General.StoragePlaces = value, _viewModel.General);
+
+				});
+
+			_viewModel.General.DatabaseNotificationService.Subscribe<OnlyMenuForm>("storage_pharmacy",
+				data =>
+				{
+					RefreshDataSimple<StoragePharmacy>(
+					value => _viewModel.General.StoragePharmacies = value, _viewModel.General);
+
+				});
 		}
 
 		private void SetFormByRole()
@@ -48,8 +200,8 @@ namespace Apteka.View.MenuV
 
 			form ??= new();
 
+			form.Visible = true;
 			form.Show();
-
 			return form;
 		}
 
@@ -193,9 +345,6 @@ namespace Apteka.View.MenuV
 			form.cbMedicineProduct.ValueMember =
 			form.cbDepartment.ValueMember = "Id";
 
-			form.StartPosition = FormStartPosition.Manual;
-			form.Location = new Point(Cursor.Position.X - form.Width / 4, Cursor.Position.Y - form.Height / 2);
-
 			if (form.ShowDialog() == DialogResult.OK)
 				return [form.cbMedicineProduct.SelectedValue?.ToString() ?? "",
 					form.cbDepartment.SelectedValue?.ToString() ?? "-1",
@@ -224,6 +373,25 @@ namespace Apteka.View.MenuV
 		private void добавитьНакладныеToolStripMenuItem_Click(object sender, EventArgs e)
 		{
 			ShowForm<WaybillDataForm>();
+		}
+
+		private void HideForms()
+		{
+			FormCollection formCollection = Application.OpenForms;
+			bool hide = false;
+			if (this.WindowState == FormWindowState.Minimized)
+				hide = false;
+			else if (this.WindowState == FormWindowState.Maximized)
+				hide = true;
+
+			foreach (Form form in formCollection)
+				if (form.Name != this.Name && form.Name != new LoginForm().Name)
+					form.Visible = hide;
+		}
+
+		private void Form_SizeChanged(object sender, EventArgs e)
+		{
+			HideForms();
 		}
 	}
 }

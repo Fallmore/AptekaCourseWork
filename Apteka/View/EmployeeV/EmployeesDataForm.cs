@@ -12,6 +12,7 @@ namespace Apteka.View.EmployeeV
 		public EmployeesDataForm()
 		{
 			Init();
+			TopMost = true;
 		}
 
 		public EmployeesDataForm(Employee e)
@@ -96,7 +97,7 @@ namespace Apteka.View.EmployeeV
 				if (ShowCreateAccount(employee))
 				{
 					MessageBox.Show("Пользователь успешно добавлен", "Добавление пользователя",
-									MessageBoxButtons.OK, MessageBoxIcon.Error);
+									MessageBoxButtons.OK, MessageBoxIcon.Information);
 					Close();
 				}
 			}
@@ -111,8 +112,8 @@ namespace Apteka.View.EmployeeV
 				Patronymic = tbPatronymic.Text,
 				Address = tbAddress.Text,
 				Birthday = DateOnly.FromDateTime(dtpBirthday.Value),
-				IdPost = int.Parse(cbPost.SelectedValue.ToString()),
-				IdDepartment = int.Parse(cbDepartment.SelectedValue.ToString())
+				IdPost = int.Parse(cbPost.SelectedValue?.ToString() ?? ""),
+				IdDepartment = int.Parse(cbDepartment.SelectedValue?.ToString() ?? "")
 			};
 
 			if (lblIdEmployee.Text != "")

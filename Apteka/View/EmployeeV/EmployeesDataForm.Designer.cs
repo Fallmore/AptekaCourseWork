@@ -263,7 +263,6 @@
         private Label label5;
         private Label label6;
         private Label label7;
-        private Button button1;
         private Button button2;
 		private Label label8;
 		internal DateTimePicker dtpBirthday;

@@ -1,4 +1,6 @@
 ﻿using Apteka.Model;
+using Apteka.Properties;
+using Apteka.Properties.DataSources;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking.Internal;
 using Npgsql;
@@ -82,11 +84,22 @@ namespace Apteka.ViewModel.EmployeeVM
 
 		internal List<Employee> GetCurrentEmployees(List<Employee> employees)
 		{
-			return employees
-				.Where(e => _general.EmployeeFireds.Any(f => f.IdEmployee != e.IdEmployee)
-					&& _general.EmployeeAccounts.Any(ea => !ea.Roles.Contains((int)Roles.Директор)
+			List<EmployeeFired> employeeFired = _general.EmployeeFireds;
+
+			List<Employee> f = employees;
+			if (_general.EmployeeFireds.Count != 0)
+				f = employees
+				.Where(e => _general.EmployeeFireds.Any(f => f.IdEmployee != e.IdEmployee))
+				.ToList();
+			f = f.Where(e => _general.EmployeeAccounts.Any(ea => !ea.Roles.Contains((int)Roles.Директор)
 							&& ea.IdEmployee == e.IdEmployee))
 				.ToList();
+			return f;
+			//return employees
+			//	.Where(e => _general.EmployeeFireds.Any(f => f.IdEmployee != e.IdEmployee)
+			//		&& _general.EmployeeAccounts.Any(ea => !ea.Roles.Contains((int)Roles.Директор)
+			//				&& ea.IdEmployee == e.IdEmployee))
+			//	.ToList();
 		}
 
 		internal SortableBindingList<EmployeeWrapper> GetDepartmentManagers()
@@ -161,7 +174,8 @@ namespace Apteka.ViewModel.EmployeeVM
 		{
 			try
 			{
-				General.AptekaContext.Database
+				AptekaContext tempContext = AptekaContextFactory.Create(Settings.Default.Username, Settings.Default.Password);
+				tempContext.Database
 					.ExecuteSqlRaw("INSERT INTO employee_fired (id_employee, reason) " +
 					"VALUES ({0}, {1})", idEmployee, reason);
 				return true;

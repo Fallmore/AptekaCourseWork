@@ -8,6 +8,7 @@ namespace Apteka.View.MedicineV
 		public ExtendedSearchMedicneProducts()
 		{
 			InitializeComponent();
+			TopMost = true;
 		}
 
 		/// <summary>

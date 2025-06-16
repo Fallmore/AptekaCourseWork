@@ -448,8 +448,8 @@
 			// 
 			лекарстваToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { лекарстваToolStripMenuItem1, препаратыToolStripMenuItem, списанныеПрепаратыToolStripMenuItem });
 			лекарстваToolStripMenuItem.Name = "лекарстваToolStripMenuItem";
-			лекарстваToolStripMenuItem.Size = new Size(110, 25);
-			лекарстваToolStripMenuItem.Text = "Справочник";
+			лекарстваToolStripMenuItem.Size = new Size(96, 25);
+			лекарстваToolStripMenuItem.Text = "Лекарства";
 			// 
 			// лекарстваToolStripMenuItem1
 			// 
@@ -501,6 +501,7 @@
 			Text = "КАССА";
 			WindowState = FormWindowState.Maximized;
 			FormClosing += Касса_FormClosing;
+			SizeChanged += Form_SizeChanged;
 			splitContainer1.Panel1.ResumeLayout(false);
 			splitContainer1.Panel2.ResumeLayout(false);
 			((System.ComponentModel.ISupportInitialize)splitContainer1).EndInit();

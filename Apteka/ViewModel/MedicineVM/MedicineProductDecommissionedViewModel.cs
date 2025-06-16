@@ -1,6 +1,8 @@
 ﻿using Apteka.Model;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking.Internal;
+using Npgsql;
+using NpgsqlTypes;
 
 namespace Apteka.ViewModel.MedicineVM
 {
@@ -53,14 +55,13 @@ namespace Apteka.ViewModel.MedicineVM
 		{
 			try
 			{
-				// Преобразуем даты в UTC
-				dtParams[0] = DateTime.SpecifyKind(dtParams[0], DateTimeKind.Utc);
-				dtParams[1] = DateTime.SpecifyKind(dtParams[1], DateTimeKind.Utc);
-
 				List<MedicineProductDecommissioned> results = await _general.AptekaContext.MedicineProductDecommissioneds
 					.FromSqlRaw("SELECT * FROM search_medicine_product_decommissioned_trgm({0}, {1}, {2}, " +
-					"{3}::timestamp, {4}::timestamp);", idMedicineProduct, reason,
-						"", dtParams[0], dtParams[1])
+					"{3}, {4});", 
+						idMedicineProduct == new Guid() ? null : idMedicineProduct, 
+						reason, "", 
+						new NpgsqlParameter("p3", NpgsqlDbType.Timestamp) { Value = dtParams[0] },
+						new NpgsqlParameter("p4", NpgsqlDbType.Timestamp) { Value = dtParams[1] })
 					.AsNoTracking()
 					.ToListAsync();
 

@@ -16,6 +16,7 @@ namespace Apteka.View.MedicineV
 		public MedicineProductDecommissionedForm()
 		{
 			InitializeComponent();
+			TopMost = true;
 			_viewModel = new();
 			_viewModel.ConfigureSettingsDGV(dgvMedicineProductDecommissioned);
 			_viewModel.SetDefaultDataSource(dgvMedicineProductDecommissioned);
@@ -30,8 +31,8 @@ namespace Apteka.View.MedicineV
 			_viewModel.General.DatabaseNotificationService.Subscribe<MedicineProductDecommissionedForm>("medicine_product_decommissioned",
 				data =>
 				{
-					RefreshData<MedicineProductDecommissioned>(_viewModel.General.MedicineProductDecommissioneds,
-					value => _viewModel.General.MedicineProductDecommissioneds = value, data,
+					RefreshData<MedicineProductDecommissioned>([],
+					value => { }, data,
 					() => _viewModel.SetDefaultDataSource(dgvMedicineProductDecommissioned));
 
 				});

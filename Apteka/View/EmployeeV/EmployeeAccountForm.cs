@@ -9,6 +9,7 @@ namespace Apteka.View.EmployeeV
 		public EmployeeAccountForm()
 		{
 			InitializeComponent();
+			TopMost = true;
 		}
 
 		private void btnOK_Click(object sender, EventArgs e)

@@ -5,6 +5,7 @@
 		public AssignForm()
 		{
 			InitializeComponent();
+			TopMost = true;
 		}
 
 		private void cbNewPost_SelectedIndexChanged(object sender, EventArgs e)
